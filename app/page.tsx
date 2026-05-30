@@ -1,8 +1,150 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useState, useRef } from "react";
-import { Loader2, CheckCircle2, X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import {
+  Loader2, CheckCircle2, X,
+  Snowflake, Mountain, Wind, Star,
+} from "lucide-react";
 import { Session } from "next-auth";
+
+// ---------------------------------------------------------------------------
+// Custom SVG icons
+// ---------------------------------------------------------------------------
+
+function SnowboardIcon() {
+  return (
+    <svg width="18" height="30" viewBox="0 0 12 22" fill="currentColor" aria-hidden="true">
+      <rect x="1" y="1" width="10" height="20" rx="5" />
+      <rect x="3" y="8"  width="6" height="1.5" rx="0.75" fill="rgba(0,0,0,0.18)" />
+      <rect x="3" y="12" width="6" height="1.5" rx="0.75" fill="rgba(0,0,0,0.18)" />
+    </svg>
+  );
+}
+
+function SkiIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <line x1="7"  y1="3" x2="7"  y2="18" />
+      <path d="M4 18 Q7 22 10 18" />
+      <line x1="17" y1="3" x2="17" y2="18" />
+      <path d="M14 18 Q17 22 20 18" />
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Flying background — icons + phrases
+// ---------------------------------------------------------------------------
+
+type FlyingItem =
+  | { kind: "icon";   el: React.ReactNode }
+  | { kind: "phrase"; text: string; size: string };
+
+const BASE_ITEMS: FlyingItem[] = [
+  { kind: "icon",   el: <Snowflake size={32} strokeWidth={1.5} /> },
+  { kind: "icon",   el: <Mountain  size={34} strokeWidth={1.5} /> },
+  { kind: "icon",   el: <Wind      size={28} strokeWidth={1.5} /> },
+  { kind: "icon",   el: <SkiIcon /> },
+  { kind: "icon",   el: <SnowboardIcon /> },
+  { kind: "icon",   el: <Snowflake size={22} strokeWidth={1.5} /> },
+  { kind: "icon",   el: <Star      size={26} strokeWidth={1.5} /> },
+  { kind: "icon",   el: <Mountain  size={28} strokeWidth={1.5} /> },
+  { kind: "icon",   el: <Wind      size={22} strokeWidth={1.5} /> },
+  { kind: "icon",   el: <Snowflake size={30} strokeWidth={1.5} /> },
+  { kind: "icon",   el: <SkiIcon /> },
+  { kind: "icon",   el: <SnowboardIcon /> },
+  { kind: "phrase", text: "YA ERA",                          size: "1.5rem" },
+  { kind: "phrase", text: "¿Nos vamos a Francia o qué?",    size: "0.95rem" },
+  { kind: "phrase", text: "Esto está crudo hermano",         size: "1.1rem"  },
+  { kind: "phrase", text: "La estoy pasando bieeen raro",   size: "0.9rem"  },
+  { kind: "phrase", text: "Hola seño buen día",             size: "1rem"    },
+  { kind: "phrase", text: "YEAH P-E-P-UUUU",                size: "1.6rem"  },
+];
+
+interface ConfigItem {
+  item: FlyingItem;
+  id: number;
+  sx: number;
+  sy: number;
+  ex: number;
+  ey: number;
+  rot: number;
+  dur: number;
+  del: number;
+}
+
+function FlyingBackground() {
+  const [config, setConfig] = useState<ConfigItem[]>([]);
+
+  useEffect(() => {
+    setConfig(
+      BASE_ITEMS.map((item, i) => ({
+        item,
+        id: i,
+        sx:  Math.random() * 110 - 5,
+        sy:  Math.random() * 110 - 5,
+        ex:  Math.random() * 110 - 5,
+        ey:  Math.random() * 110 - 5,
+        rot: Math.random() * 360 - 180,
+        dur: 12 + Math.random() * 16,
+        del: Math.random() * 20,
+      }))
+    );
+  }, []);
+
+  if (config.length === 0) return null;
+
+  const css = config
+    .map(
+      (c) => `
+        @keyframes fly-${c.id} {
+          0%   { transform: translate(${c.sx}vw, ${c.sy}vh) rotate(0deg);         opacity: 0; }
+          12%  { opacity: 0.6; }
+          88%  { opacity: 0.6; }
+          100% { transform: translate(${c.ex}vw, ${c.ey}vh) rotate(${c.rot}deg); opacity: 0; }
+        }
+      `
+    )
+    .join("");
+
+  return (
+    <>
+      <style>{css}</style>
+      <div
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        {config.map((c) => (
+          <div
+            key={c.id}
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              color: "rgba(255,255,255,0.58)",
+              animation: `fly-${c.id} ${c.dur}s ${c.del}s ease-in-out infinite`,
+            }}
+          >
+            {c.item.kind === "icon" ? (
+              c.item.el
+            ) : (
+              <span
+                style={{
+                  fontFamily: "var(--font-pacifico), cursive",
+                  fontSize: c.item.size,
+                  whiteSpace: "nowrap",
+                  textShadow: "0 2px 6px rgba(0,0,0,0.35)",
+                }}
+              >
+                {c.item.text}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Interfaces
@@ -28,52 +170,7 @@ interface FormErrors {
 }
 
 // ---------------------------------------------------------------------------
-// Floating ski background
-// ---------------------------------------------------------------------------
-
-const FLOAT_ELEMENTS = [
-  { e: "⛷️",  x: "7%",  y: "10%", s: "2.6rem", a: "float1", d: "6s",   dl: "0s"   },
-  { e: "🏂",  x: "84%", y: "16%", s: "3.2rem", a: "float2", d: "8s",   dl: "1s"   },
-  { e: "🎿",  x: "11%", y: "65%", s: "2.2rem", a: "float3", d: "7s",   dl: "2s"   },
-  { e: "❄️",  x: "73%", y: "7%",  s: "2rem",   a: "float1", d: "5s",   dl: "0.5s" },
-  { e: "❄️",  x: "27%", y: "82%", s: "1.6rem", a: "float2", d: "9s",   dl: "3s"   },
-  { e: "🏔️", x: "89%", y: "70%", s: "3rem",   a: "float3", d: "10s",  dl: "1.5s" },
-  { e: "⛷️",  x: "47%", y: "3%",  s: "2.4rem", a: "float2", d: "7.5s", dl: "4s"   },
-  { e: "❄️",  x: "3%",  y: "40%", s: "2.2rem", a: "float1", d: "6.5s", dl: "2.5s" },
-  { e: "🏂",  x: "57%", y: "87%", s: "2.6rem", a: "float3", d: "8.5s", dl: "0.8s" },
-  { e: "❄️",  x: "39%", y: "50%", s: "1.3rem", a: "float1", d: "9.5s", dl: "3.5s" },
-  { e: "🎿",  x: "64%", y: "43%", s: "1.8rem", a: "float2", d: "11s",  dl: "5s"   },
-  { e: "🏔️", x: "19%", y: "28%", s: "2rem",   a: "float3", d: "12s",  dl: "6s"   },
-];
-
-function SkiBackground() {
-  return (
-    <div
-      className="fixed inset-0 pointer-events-none z-0"
-      aria-hidden="true"
-    >
-      {FLOAT_ELEMENTS.map((el, i) => (
-        <span
-          key={i}
-          style={{
-            position: "absolute",
-            left: el.x,
-            top: el.y,
-            fontSize: el.s,
-            animation: `${el.a} ${el.d} ${el.dl} ease-in-out infinite`,
-            opacity: 0.35,
-            userSelect: "none",
-          }}
-        >
-          {el.e}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Shared card wrapper with French tricolor stripe
+// Shared card with French tricolor stripe
 // ---------------------------------------------------------------------------
 
 function Card({
@@ -85,7 +182,6 @@ function Card({
 }) {
   return (
     <div className={`relative bg-white rounded-3xl shadow-2xl overflow-hidden ${className}`}>
-      {/* French tricolor stripe */}
       <div className="flex h-2">
         <div className="flex-1 bg-french-blue" />
         <div className="flex-1 bg-white border-t border-gray-200" />
@@ -109,17 +205,16 @@ function LoginView({
 }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1929] via-[#0d2d5e] to-[#0055A4] flex items-center justify-center py-12 overflow-hidden">
-      <SkiBackground />
+      <FlyingBackground />
       <Card className="relative z-10 max-w-sm w-full mx-4">
         <div className="text-center">
           <h1 className="font-display text-5xl text-french-blue leading-tight">
             The Annex
           </h1>
-          <p className="text-base font-semibold text-gray-500 mt-1 tracking-wide uppercase text-sm">
+          <p className="text-sm font-semibold text-gray-400 mt-1 tracking-widest uppercase">
             Val Thorens
           </p>
-          <p className="text-3xl mt-2">🏔️</p>
-          <p className="text-gray-600 text-sm mt-3">
+          <p className="text-gray-500 text-sm mt-4 leading-relaxed">
             Enviá tu CV a todos los empleadores de la estación en minutos.
           </p>
         </div>
@@ -128,18 +223,12 @@ function LoginView({
           <button
             onClick={onSignIn}
             disabled={signingIn}
-            className="w-full bg-white border-2 border-gray-200 rounded-xl py-3 px-6 flex items-center justify-center gap-3 hover:border-french-blue hover:bg-blue-50 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 font-medium text-gray-700 shadow-sm"
+            className="w-full bg-white border-2 border-gray-200 rounded-xl py-3 px-6 flex items-center justify-center gap-3 hover:border-french-blue hover:bg-blue-50 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 font-semibold text-gray-700 shadow-sm"
           >
             {signingIn ? (
               <Loader2 className="w-5 h-5 animate-spin text-french-blue" />
             ) : (
-              <svg
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
+              <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
@@ -150,7 +239,7 @@ function LoginView({
           </button>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <p className="text-center text-xs text-gray-400 mt-5">
           Solo pedimos permiso para enviar emails desde tu cuenta.
         </p>
       </Card>
@@ -161,21 +250,21 @@ function LoginView({
 function LoadingView() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1929] via-[#0d2d5e] to-[#0055A4] flex items-center justify-center py-12 overflow-hidden">
-      <SkiBackground />
+      <FlyingBackground />
       <div role="status" aria-live="polite" className="relative z-10 max-w-md w-full mx-4">
-      <Card className="text-center">
-        <p className="font-display text-3xl text-french-blue mb-4">The Annex</p>
-        <Loader2 className="animate-spin text-french-blue w-12 h-12 mx-auto" />
-        <p className="text-lg font-semibold text-gray-800 mt-4">Iniciando proceso...</p>
-        <p className="text-sm text-gray-400 mt-2">
-          Esto puede tardar varios minutos. ☕
-        </p>
-        <div className="flex justify-center gap-1 mt-6">
-          <div className="w-2 h-2 rounded-full bg-french-blue animate-bounce" style={{ animationDelay: "0ms" }} />
-          <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: "150ms" }} />
-          <div className="w-2 h-2 rounded-full bg-french-red animate-bounce" style={{ animationDelay: "300ms" }} />
-        </div>
-      </Card>
+        <Card className="text-center">
+          <p className="font-display text-3xl text-french-blue mb-4">The Annex</p>
+          <Loader2 className="animate-spin text-french-blue w-12 h-12 mx-auto" />
+          <p className="text-lg font-semibold text-gray-800 mt-4">Iniciando proceso...</p>
+          <p className="text-sm text-gray-400 mt-2">
+            Esto puede tardar varios minutos. ☕
+          </p>
+          <div className="flex justify-center gap-1 mt-6">
+            <div className="w-2 h-2 rounded-full bg-french-blue animate-bounce" style={{ animationDelay: "0ms" }} />
+            <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: "150ms" }} />
+            <div className="w-2 h-2 rounded-full bg-french-red animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
+        </Card>
       </div>
     </div>
   );
@@ -242,7 +331,6 @@ function FormView({
     const errs = validate(formData);
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
-
     setIsSubmitting(true);
     try {
       fetch("/api/run", {
@@ -257,9 +345,7 @@ function FormView({
           availTo: formData.availTo,
           accessToken: session.access_token,
         }),
-      }).catch(() => {
-        // Phase 1: /api/run does not exist yet — ignore network error
-      });
+      }).catch(() => {});
       onSubmitComplete();
     } catch {
       setErrors((e) => ({
@@ -272,10 +358,9 @@ function FormView({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1929] via-[#0d2d5e] to-[#0055A4] py-12 overflow-hidden">
-      <SkiBackground />
+      <FlyingBackground />
       <div className="relative z-10 max-w-lg mx-auto px-4">
         <Card>
-          {/* Card header */}
           <div className="flex items-center justify-between mb-8 -mt-2">
             <div>
               <h2 className="font-display text-2xl text-french-blue">The Annex</h2>
@@ -350,8 +435,9 @@ function FormView({
                       : "border-gray-200 hover:border-french-blue hover:bg-blue-50"
                   }`}
                 >
-                  <p className="text-2xl mb-1">📄</p>
-                  <p className="text-sm font-medium text-gray-600">Arrastra tu CV o haz click</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Arrastra tu CV o haz click
+                  </p>
                   <p className="text-xs text-gray-400 mt-1">PDF · Max 5 MB</p>
                 </div>
               )}
@@ -502,7 +588,7 @@ function FormView({
 }
 
 // ---------------------------------------------------------------------------
-// Main component
+// Main
 // ---------------------------------------------------------------------------
 
 export default function Home() {
@@ -514,18 +600,13 @@ export default function Home() {
 
   if (status === "authenticated") {
     if (view === "loading") return <LoadingView />;
-    return (
-      <FormView session={session} onSubmitComplete={() => setView("loading")} />
-    );
+    return <FormView session={session} onSubmitComplete={() => setView("loading")} />;
   }
 
   return (
     <LoginView
       signingIn={signingIn}
-      onSignIn={() => {
-        setSigningIn(true);
-        signIn("google");
-      }}
+      onSignIn={() => { setSigningIn(true); signIn("google"); }}
     />
   );
 }
