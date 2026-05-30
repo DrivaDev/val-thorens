@@ -104,7 +104,7 @@ function FlyingBackground() {
           ex,  ey,
           rot: Math.random() * 200 - 100,
           dur: 22 + Math.random() * 18,            // 22–40s — slow
-          del: (i / total) * 18,                   // staggered, not random
+          del: (i / total) * 6,                    // max 6s stagger — appears fast
         };
       })
     );
@@ -117,8 +117,8 @@ function FlyingBackground() {
       (c) => `
         @keyframes fly-${c.id} {
           0%   { transform: translate(${c.sx}vw, ${c.sy}vh) rotate(0deg);         opacity: 0; }
-          15%  { opacity: 0.55; }
-          85%  { opacity: 0.55; }
+          8%   { opacity: 0.55; }
+          92%  { opacity: 0.55; }
           100% { transform: translate(${c.ex}vw, ${c.ey}vh) rotate(${c.rot}deg); opacity: 0; }
         }
       `
