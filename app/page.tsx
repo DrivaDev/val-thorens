@@ -77,18 +77,36 @@ function FlyingBackground() {
   const [config, setConfig] = useState<ConfigItem[]>([]);
 
   useEffect(() => {
+    const total = BASE_ITEMS.length;
+    const cols = 4;
+    const rows = Math.ceil(total / cols);
+    const cellW = 100 / cols;
+    const cellH = 100 / rows;
+
     setConfig(
-      BASE_ITEMS.map((item, i) => ({
-        item,
-        id: i,
-        sx:  Math.random() * 110 - 5,
-        sy:  Math.random() * 110 - 5,
-        ex:  Math.random() * 110 - 5,
-        ey:  Math.random() * 110 - 5,
-        rot: Math.random() * 360 - 180,
-        dur: 12 + Math.random() * 16,
-        del: Math.random() * 20,
-      }))
+      BASE_ITEMS.map((item, i) => {
+        // Grid-based start positions so elements cover the whole screen evenly
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const sx = col * cellW + Math.random() * cellW * 0.75 + cellW * 0.1;
+        const sy = row * cellH + Math.random() * cellH * 0.75 + cellH * 0.1;
+
+        // Travel direction: spread angles evenly across 360° + small random offset
+        const angle = (i / total) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+        const dist  = 25 + Math.random() * 30; // travel 25–55% of screen
+        const ex    = sx + Math.cos(angle) * dist;
+        const ey    = sy + Math.sin(angle) * dist;
+
+        return {
+          item,
+          id:  i,
+          sx,  sy,
+          ex,  ey,
+          rot: Math.random() * 200 - 100,
+          dur: 22 + Math.random() * 18,            // 22–40s — slow
+          del: (i / total) * 18,                   // staggered, not random
+        };
+      })
     );
   }, []);
 
@@ -99,8 +117,8 @@ function FlyingBackground() {
       (c) => `
         @keyframes fly-${c.id} {
           0%   { transform: translate(${c.sx}vw, ${c.sy}vh) rotate(0deg);         opacity: 0; }
-          12%  { opacity: 0.6; }
-          88%  { opacity: 0.6; }
+          15%  { opacity: 0.55; }
+          85%  { opacity: 0.55; }
           100% { transform: translate(${c.ex}vw, ${c.ey}vh) rotate(${c.rot}deg); opacity: 0; }
         }
       `
@@ -121,8 +139,9 @@ function FlyingBackground() {
               position: "absolute",
               left: 0,
               top: 0,
-              color: "rgba(255,255,255,0.58)",
+              color: "rgba(255,255,255,0.6)",
               animation: `fly-${c.id} ${c.dur}s ${c.del}s ease-in-out infinite`,
+              animationFillMode: "both",   // ← prevents flash at (0,0) during delay
             }}
           >
             {c.item.kind === "icon" ? (
@@ -133,7 +152,7 @@ function FlyingBackground() {
                   fontFamily: "var(--font-pacifico), cursive",
                   fontSize: c.item.size,
                   whiteSpace: "nowrap",
-                  textShadow: "0 2px 6px rgba(0,0,0,0.35)",
+                  textShadow: "0 2px 8px rgba(0,0,0,0.4)",
                 }}
               >
                 {c.item.text}
