@@ -16,6 +16,10 @@ const config: Config = {
           red: '#EF4135',
         },
       },
+      fontFamily: {
+        display: ["var(--font-pacifico)", "cursive"],
+        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
     },
   },
   plugins: [],
