@@ -42,23 +42,23 @@ type FlyingItem =
 
 const BASE_ITEMS: FlyingItem[] = [
   { kind: "icon",   el: <Snowflake size={32} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "YA ERA",                          size: "1.5rem"  },
   { kind: "icon",   el: <Mountain  size={34} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "¿Nos vamos a Francia o qué?",    size: "0.95rem" },
   { kind: "icon",   el: <Wind      size={28} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "Esto está crudo hermano",         size: "1.1rem"  },
   { kind: "icon",   el: <SkiIcon /> },
+  { kind: "phrase", text: "La estoy pasando bieeen raro",   size: "0.9rem"  },
   { kind: "icon",   el: <SnowboardIcon /> },
+  { kind: "phrase", text: "Hola seño buen día",             size: "1rem"    },
   { kind: "icon",   el: <Snowflake size={22} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "YEAH P-E-P-UUUU",                size: "1.6rem"  },
   { kind: "icon",   el: <Star      size={26} strokeWidth={1.5} /> },
   { kind: "icon",   el: <Mountain  size={28} strokeWidth={1.5} /> },
   { kind: "icon",   el: <Wind      size={22} strokeWidth={1.5} /> },
   { kind: "icon",   el: <Snowflake size={30} strokeWidth={1.5} /> },
   { kind: "icon",   el: <SkiIcon /> },
   { kind: "icon",   el: <SnowboardIcon /> },
-  { kind: "phrase", text: "YA ERA",                          size: "1.5rem" },
-  { kind: "phrase", text: "¿Nos vamos a Francia o qué?",    size: "0.95rem" },
-  { kind: "phrase", text: "Esto está crudo hermano",         size: "1.1rem"  },
-  { kind: "phrase", text: "La estoy pasando bieeen raro",   size: "0.9rem"  },
-  { kind: "phrase", text: "Hola seño buen día",             size: "1rem"    },
-  { kind: "phrase", text: "YEAH P-E-P-UUUU",                size: "1.6rem"  },
 ];
 
 interface ConfigItem {
