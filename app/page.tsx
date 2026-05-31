@@ -393,8 +393,13 @@ function ProgressView({
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!response.body) {
+      setLogLines([{ text: "Error: no se pudo leer la respuesta del servidor.", color: "red" }]);
+      setSummary({ sent: 0, skipped: 0 });
+      return;
+    }
     let cancelled = false;
-    const reader = response.body!.getReader();
+    const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
 
@@ -406,11 +411,14 @@ function ProgressView({
         const parts = buffer.split("\n\n");
         buffer = parts.pop() ?? "";
         for (const part of parts) {
-          const line = part.trim();
-          if (!line.startsWith("data: ")) continue;
+          const dataLines = part
+            .split("\n")
+            .filter((l) => l.startsWith("data: "))
+            .map((l) => l.slice(6));
+          if (dataLines.length === 0) continue;
           let ev: SSEEvent;
           try {
-            ev = JSON.parse(line.slice(6));
+            ev = JSON.parse(dataLines.join("\n"));
           } catch {
             continue;
           }
@@ -587,12 +595,12 @@ function FormView({
           availFrom: formData.availFrom,
           availTo: formData.availTo,
           hasEUPassport: formData.hasEUPassport,
-          accessToken: session.access_token,
         }),
       });
       if (!response.ok || !response.body) {
         throw new Error("El servidor rechazó la solicitud");
       }
+      setIsSubmitting(false);
       onSubmitStart(response);
     } catch {
       setErrors((e) => ({
@@ -632,9 +640,12 @@ function FormView({
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData((d) => ({ ...d, name: e.target.value }))}
-                onBlur={() => {
-                  const errs = validate(formData);
-                  setErrors((e) => ({ ...e, name: errs.name }));
+                onBlur={(e) => {
+                  const trimmed = e.target.value.trim();
+                  setErrors((prev) => ({
+                    ...prev,
+                    name: trimmed ? undefined : "El nombre es obligatorio",
+                  }));
                 }}
                 placeholder="Juan García"
                 className={`text-base w-full border-2 rounded-xl px-4 py-3 mt-2 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors ${
@@ -764,9 +775,12 @@ function FormView({
                 type="text"
                 value={formData.languages}
                 onChange={(e) => setFormData((d) => ({ ...d, languages: e.target.value }))}
-                onBlur={() => {
-                  const errs = validate(formData);
-                  setErrors((e) => ({ ...e, languages: errs.languages }));
+                onBlur={(e) => {
+                  const trimmed = e.target.value.trim();
+                  setErrors((prev) => ({
+                    ...prev,
+                    languages: trimmed ? undefined : "Indica al menos un idioma",
+                  }));
                 }}
                 placeholder="Español, Francés, Inglés"
                 className={`text-base w-full border-2 rounded-xl px-4 py-3 mt-2 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors ${
