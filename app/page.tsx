@@ -339,33 +339,176 @@ function LoginView({
   );
 }
 
-function LoadingView() {
-  return (
+// ---------------------------------------------------------------------------
+// SSE types + ProgressView
+// ---------------------------------------------------------------------------
+
+type SSEEvent =
+  | { type: "searching"; message: string }
+  | { type: "discovery_complete"; total: number }
+  | { type: "scraping"; employer: string; email: string | null }
+  | { type: "generating"; employer: string }
+  | { type: "sent"; employer: string; email: string }
+  | { type: "logged"; employer: string }
+  | { type: "send_error"; employer: string; error: string }
+  | { type: "complete"; sent: number; skipped: number };
+
+interface LogLine {
+  text: string;
+  color: "blue" | "green" | "red" | "gray";
+}
+
+function eventToLogLine(ev: SSEEvent): LogLine | null {
+  switch (ev.type) {
+    case "searching":
+      return { text: ev.message, color: "blue" };
+    case "discovery_complete":
+      return { text: `Se encontraron ${ev.total} empleadores`, color: "blue" };
+    case "scraping":
+      return ev.email === null
+        ? { text: `${ev.employer}: sin email, omitido`, color: "gray" }
+        : { text: `${ev.employer}: email encontrado (${ev.email})`, color: "blue" };
+    case "generating":
+      return { text: `Generando email para ${ev.employer}...`, color: "blue" };
+    case "sent":
+      return { text: `Email enviado a ${ev.employer}`, color: "green" };
+    case "logged":
+      return { text: `${ev.employer} registrado en Google Sheets`, color: "blue" };
+    case "send_error":
+      return { text: `Error con ${ev.employer}: ${ev.error}`, color: "red" };
+    case "complete":
+      return null;
+  }
+}
+
+function ProgressView({
+  response,
+  onReset,
+}: {
+  response: Response;
+  onReset: () => void;
+}) {
+  const [logLines, setLogLines] = useState<LogLine[]>([]);
+  const [summary, setSummary] = useState<{ sent: number; skipped: number } | null>(null);
+  const logEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    async function read() {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done || cancelled) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() ?? "";
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line.startsWith("data: ")) continue;
+          let ev: SSEEvent;
+          try {
+            ev = JSON.parse(line.slice(6));
+          } catch {
+            continue;
+          }
+          if (ev.type === "complete") {
+            setSummary({ sent: ev.sent, skipped: ev.skipped });
+          } else {
+            const logLine = eventToLogLine(ev);
+            if (logLine) setLogLines((prev) => [...prev, logLine]);
+          }
+        }
+      }
+    }
+    read().catch(() => {
+      // Stream interrumpido — el evento complete normalmente cubre el cierre.
+    });
+    return () => {
+      cancelled = true;
+      reader.cancel().catch(() => {});
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logLines.length]);
+
+  const wrapper = (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1929] via-[#0d2d5e] to-[#0055A4] flex items-center justify-center py-12 overflow-hidden">
       <FlyingBackground />
-      <div role="status" aria-live="polite" className="relative z-10 max-w-md w-full mx-4">
-        <Card className="text-center">
-          <p className="font-display text-3xl text-french-blue mb-4">The Annex</p>
-          <Loader2 className="animate-spin text-french-blue w-12 h-12 mx-auto" />
-          <p className="text-lg font-semibold text-gray-800 mt-4">Iniciando proceso...</p>
-          <p className="text-sm text-gray-400 mt-2">Esto puede tardar varios minutos. ☕</p>
-          <div className="flex justify-center gap-1 mt-6">
-            <div className="w-2 h-2 rounded-full bg-french-blue animate-bounce" style={{ animationDelay: "0ms" }} />
-            <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: "150ms" }} />
-            <div className="w-2 h-2 rounded-full bg-french-red animate-bounce" style={{ animationDelay: "300ms" }} />
-          </div>
+      <div className="relative z-10 max-w-md w-full mx-4">
+        <Card>
+          {summary ? (
+            <div className="text-center">
+              <CheckCircle2 className="text-green-600 w-12 h-12 mx-auto" />
+              <h2 className="font-display text-2xl text-french-blue mt-3">Proceso completado</h2>
+              <div className="flex justify-center gap-8 mt-6">
+                <div>
+                  <p className="text-3xl font-bold text-green-600">{summary.sent}</p>
+                  <p className="text-sm text-gray-500 mt-1">emails enviados</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-gray-400">{summary.skipped}</p>
+                  <p className="text-sm text-gray-500 mt-1">empleadores omitidos</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 mt-6 flex items-center justify-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                Registrado en Google Sheets
+              </p>
+              <button
+                onClick={onReset}
+                className="w-full bg-french-blue text-white rounded-xl py-3 px-6 text-base font-bold hover:bg-blue-800 active:scale-[0.98] transition-all duration-200 mt-8 shadow-lg shadow-blue-200"
+              >
+                Volver al formulario
+              </button>
+            </div>
+          ) : (
+            <>
+              <h2 className="font-display text-2xl text-french-blue">The Annex</h2>
+              <div className="flex items-center gap-2 mt-2">
+                <Loader2 className="w-5 h-5 animate-spin text-french-blue" />
+                <p className="text-lg font-semibold text-gray-800">Proceso en curso...</p>
+              </div>
+              <div className="mt-4 max-h-80 overflow-y-auto rounded-xl bg-gray-50 border border-gray-200 p-3 flex flex-col gap-1">
+                {logLines.map((l, i) => (
+                  <p
+                    key={i}
+                    className={`text-sm leading-snug ${
+                      l.color === "green"
+                        ? "text-green-600"
+                        : l.color === "red"
+                        ? "text-french-red"
+                        : l.color === "gray"
+                        ? "text-gray-400"
+                        : "text-french-blue"
+                    }`}
+                  >
+                    {l.text}
+                  </p>
+                ))}
+                <div ref={logEndRef} />
+              </div>
+            </>
+          )}
         </Card>
       </div>
     </div>
   );
+
+  return wrapper;
 }
 
 function FormView({
   session,
-  onSubmitComplete,
+  onSubmitStart,
 }: {
   session: Session;
-  onSubmitComplete: () => void;
+  onSubmitStart: (response: Response) => void;
 }) {
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -433,7 +576,7 @@ function FormView({
     if (Object.keys(errs).length > 0) return;
     setIsSubmitting(true);
     try {
-      fetch("/api/run", {
+      const response = await fetch("/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -446,8 +589,11 @@ function FormView({
           hasEUPassport: formData.hasEUPassport,
           accessToken: session.access_token,
         }),
-      }).catch(() => {});
-      onSubmitComplete();
+      });
+      if (!response.ok || !response.body) {
+        throw new Error("El servidor rechazó la solicitud");
+      }
+      onSubmitStart(response);
     } catch {
       setErrors((e) => ({
         ...e,
@@ -716,14 +862,26 @@ function FormView({
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const [view, setView] = useState<"login" | "form" | "loading">("login");
+  const [view, setView] = useState<"login" | "form" | "progress">("login");
+  const [runResponse, setRunResponse] = useState<Response | null>(null);
   const [signingIn, setSigningIn] = useState(false);
 
   if (status === "loading") return null;
 
   if (status === "authenticated") {
-    if (view === "loading") return <LoadingView />;
-    return <FormView session={session} onSubmitComplete={() => setView("loading")} />;
+    if (view === "progress" && runResponse)
+      return (
+        <ProgressView
+          response={runResponse}
+          onReset={() => { setRunResponse(null); setView("form"); }}
+        />
+      );
+    return (
+      <FormView
+        session={session}
+        onSubmitStart={(res) => { setRunResponse(res); setView("progress"); }}
+      />
+    );
   }
 
   return (
