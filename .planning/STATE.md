@@ -21,18 +21,18 @@ See: .planning/PROJECT.md
 ## Current Position
 
 **Active phase:** Phase 2 — Pipeline (executing)
-**Active plan:** 02-03 (Wave 2 — gemini.ts + gmail.ts)
-**Last completed:** 02-02 — lib/places.ts + lib/scraper.ts
+**Active plan:** 02-04 (Wave 2 — sheets.ts + scrape route)
+**Last completed:** 02-03 — lib/gemini.ts + lib/gmail.ts
 
 ```
-Progress: [✓] Phase 1  [2/5] Phase 2  [ ] Phase 3
+Progress: [✓] Phase 1  [3/5] Phase 2  [ ] Phase 3
 ```
 
 ## Performance Metrics
 
-- Plans completed: 2
+- Plans completed: 3
 - Phases completed: 0
-- Requirements delivered: 11 / 37
+- Requirements delivered: 19 / 37
 
 ## Accumulated Context
 
@@ -44,6 +44,9 @@ Progress: [✓] Phase 1  [2/5] Phase 2  [ ] Phase 3
 - Gemini 2.0 Flash for email generation — free tier, fast, sufficient quality
 - Array.from(new Set()) inside page.evaluate() — avoids TypeScript downlevelIteration error
 - URL scheme validation (http/https) before page.goto() — mitigates T-02-02-01 Tampering threat
+- CandidateData interface omits hasEUPassport — plan contract does not require it for v1
+- Content-Transfer-Encoding: quoted-printable added to MIME text part — RFC 2822 best practice
+- MIME boundary uses Date.now() + Math.random() suffix for per-call uniqueness
 
 ### Constraints to Keep in Mind
 - Vercel `maxDuration: 300` required for run route (Pro plan)
@@ -61,5 +64,5 @@ Progress: [✓] Phase 1  [2/5] Phase 2  [ ] Phase 3
 
 ## Session Continuity
 
-Next action: Continue Phase 2 execution — run plan 02-03 (lib/gemini.ts + lib/gmail.ts).
-Last session: 2026-05-31 — Completed 02-02-PLAN.md (lib/places.ts + lib/scraper.ts).
+Next action: Continue Phase 2 execution — run plan 02-04 (lib/sheets.ts + app/api/scrape/route.ts).
+Last session: 2026-05-31 — Completed 02-03-PLAN.md (lib/gemini.ts + lib/gmail.ts).
