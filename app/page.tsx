@@ -111,8 +111,15 @@ const BASE_ITEMS: FlyingItem[] = [
   { kind: "icon",   el: <Wind      size={22} strokeWidth={1.5} /> },
   { kind: "phrase", text: "DELFI HACE EL VLOG DE CÓRDOBA",       size: "0.85rem" },
   { kind: "icon",   el: <Snowflake size={30} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "Mierda loco, cebola, cooñoo",       size: "0.9rem"  },
   { kind: "icon",   el: <SkiIcon /> },
+  { kind: "phrase", text: "Diablo",                             size: "1.8rem"  },
   { kind: "icon",   el: <SnowboardIcon /> },
+  { kind: "phrase", text: "Wa happen",                          size: "1.2rem"  },
+  { kind: "icon",   el: <Star size={24} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "Pero no ves que son liimones",      size: "0.95rem" },
+  { kind: "icon",   el: <Snowflake size={26} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "NOOOOOOOOOOO samal",                 size: "1.3rem"  },
 ];
 
 interface ConfigItem {
