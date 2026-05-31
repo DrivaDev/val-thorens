@@ -16,24 +16,24 @@ export async function generateEmailBody(
 ): Promise<string> {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-  const prompt = `Escribe un email de candidatura en francés profesional y cordial para una temporada de invierno en Val Thorens.
+  const prompt = `Write a professional and friendly job application email in English for a winter season in Val Thorens.
 
-Candidato: ${candidate.name}
-Tipos de trabajo buscados: ${candidate.jobTypes.join(', ')}
-Idiomas: ${candidate.languages}
-Disponibilidad: del ${candidate.availFrom} al ${candidate.availTo}
+Candidate: ${candidate.name}
+Job types sought: ${candidate.jobTypes.join(', ')}
+Languages: ${candidate.languages}
+Availability: from ${candidate.availFrom} to ${candidate.availTo}
 
-Empleador: ${employer.name}
+Employer: ${employer.name}
 
-El email debe incluir obligatoriamente:
-1. Presentación breve del candidato con su nombre
-2. Interés específico en trabajar en el establecimiento "${employer.name}"
-3. Disponibilidad exacta mencionada (del ${candidate.availFrom} al ${candidate.availTo})
-4. Idiomas hablados: ${candidate.languages}
-5. Mención explícita de que el CV se adjunta al email
-6. Cierre cordial con el nombre del candidato
+The email must include:
+1. Brief introduction of the candidate with their name
+2. Specific interest in working at "${employer.name}"
+3. Exact availability (from ${candidate.availFrom} to ${candidate.availTo})
+4. Languages spoken: ${candidate.languages}
+5. Explicit mention that a CV is attached
+6. Friendly closing with the candidate's name
 
-Responde ÚNICAMENTE con el cuerpo del email en francés, sin asunto, sin "Objet:", sin bloques de código, sin comillas alrededor del texto.`;
+Reply with ONLY the email body in English, no subject line, no "Subject:", no code blocks, no surrounding quotes.`;
 
   return await callWithRetry(() => model.generateContent(prompt));
 }
