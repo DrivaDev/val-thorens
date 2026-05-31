@@ -33,6 +33,61 @@ function SkiIcon() {
 }
 
 // ---------------------------------------------------------------------------
+// Image carousel
+// ---------------------------------------------------------------------------
+
+const CAROUSEL_IMAGES = [
+  "/carousel/1.jpg",
+  "/carousel/2.jpg",
+  "/carousel/3.jpg",
+  "/carousel/4.jpg",
+  "/carousel/5.jpg",
+];
+
+function ImageCarousel() {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((c) => (c + 1) % CAROUSEL_IMAGES.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div
+      className="relative w-full rounded-xl overflow-hidden shadow-md my-5"
+      style={{ aspectRatio: "16/9", minHeight: "140px" }}
+    >
+      {CAROUSEL_IMAGES.map((src, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={i}
+          src={src}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+          style={{ opacity: i === current ? 1 : 0 }}
+        />
+      ))}
+      {/* Dot indicators */}
+      <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+        {CAROUSEL_IMAGES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            aria-label={`Foto ${i + 1}`}
+            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+              i === current ? "bg-white scale-125" : "bg-white/50"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Flying background — icons + phrases
 // ---------------------------------------------------------------------------
 
@@ -42,20 +97,23 @@ type FlyingItem =
 
 const BASE_ITEMS: FlyingItem[] = [
   { kind: "icon",   el: <Snowflake size={32} strokeWidth={1.5} /> },
-  { kind: "phrase", text: "YA ERA",                          size: "1.5rem"  },
+  { kind: "phrase", text: "YA ERA",                               size: "1.5rem"  },
   { kind: "icon",   el: <Mountain  size={34} strokeWidth={1.5} /> },
-  { kind: "phrase", text: "¿Nos vamos a Francia o qué?",    size: "0.95rem" },
+  { kind: "phrase", text: "¿Nos vamos a Francia o qué?",         size: "0.95rem" },
   { kind: "icon",   el: <Wind      size={28} strokeWidth={1.5} /> },
-  { kind: "phrase", text: "Esto está crudo hermano",         size: "1.1rem"  },
+  { kind: "phrase", text: "Esto está crudo hermano",              size: "1.1rem"  },
   { kind: "icon",   el: <SkiIcon /> },
-  { kind: "phrase", text: "La estoy pasando bieeen raro",   size: "0.9rem"  },
+  { kind: "phrase", text: "La estoy pasando bieeen raro",        size: "0.9rem"  },
   { kind: "icon",   el: <SnowboardIcon /> },
-  { kind: "phrase", text: "Hola seño buen día",             size: "1rem"    },
+  { kind: "phrase", text: "Hola seño buen día",                  size: "1rem"    },
   { kind: "icon",   el: <Snowflake size={22} strokeWidth={1.5} /> },
-  { kind: "phrase", text: "YEAH P-E-P-UUUU",                size: "1.6rem"  },
+  { kind: "phrase", text: "YEAH P-E-P-UUUU",                     size: "1.6rem"  },
   { kind: "icon",   el: <Star      size={26} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "se me bajó el ashuuucar",             size: "1rem"    },
   { kind: "icon",   el: <Mountain  size={28} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "es que me gustan toodas",             size: "1.1rem"  },
   { kind: "icon",   el: <Wind      size={22} strokeWidth={1.5} /> },
+  { kind: "phrase", text: "DELFI HACE EL VLOG DE CÓRDOBA",       size: "0.85rem" },
   { kind: "icon",   el: <Snowflake size={30} strokeWidth={1.5} /> },
   { kind: "icon",   el: <SkiIcon /> },
   { kind: "icon",   el: <SnowboardIcon /> },
@@ -85,26 +143,19 @@ function FlyingBackground() {
 
     setConfig(
       BASE_ITEMS.map((item, i) => {
-        // Grid-based start positions so elements cover the whole screen evenly
         const col = i % cols;
         const row = Math.floor(i / cols);
         const sx = col * cellW + Math.random() * cellW * 0.75 + cellW * 0.1;
         const sy = row * cellH + Math.random() * cellH * 0.75 + cellH * 0.1;
-
-        // Travel direction: spread angles evenly across 360° + small random offset
         const angle = (i / total) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
-        const dist  = 25 + Math.random() * 30; // travel 25–55% of screen
+        const dist  = 25 + Math.random() * 30;
         const ex    = sx + Math.cos(angle) * dist;
         const ey    = sy + Math.sin(angle) * dist;
-
         return {
-          item,
-          id:  i,
-          sx,  sy,
-          ex,  ey,
+          item, id: i, sx, sy, ex, ey,
           rot: Math.random() * 200 - 100,
-          dur: 22 + Math.random() * 18,            // 22–40s — slow
-          del: (i / total) * 6,                    // max 6s stagger — appears fast
+          dur: 22 + Math.random() * 18,
+          del: (i / total) * 6,
         };
       })
     );
@@ -141,7 +192,7 @@ function FlyingBackground() {
               top: 0,
               color: "rgba(255,255,255,0.6)",
               animation: `fly-${c.id} ${c.dur}s ${c.del}s ease-in-out infinite`,
-              animationFillMode: "both",   // ← prevents flash at (0,0) during delay
+              animationFillMode: "both",
             }}
           >
             {c.item.kind === "icon" ? (
@@ -177,6 +228,7 @@ interface FormData {
   languages: string;
   availFrom: string;
   availTo: string;
+  hasEUPassport: boolean;
 }
 
 interface FormErrors {
@@ -186,6 +238,21 @@ interface FormErrors {
   languages?: string;
   dates?: string;
   submit?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Date helper
+// ---------------------------------------------------------------------------
+
+function isValidDate(s: string): boolean {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return false;
+  const [d, m, y] = s.split("/").map(Number);
+  const date = new Date(y, m - 1, d);
+  return (
+    date.getFullYear() === y &&
+    date.getMonth() === m - 1 &&
+    date.getDate() === d
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -233,12 +300,15 @@ function LoginView({
           <p className="text-sm font-semibold text-gray-400 mt-1 tracking-widest uppercase">
             Val Thorens
           </p>
-          <p className="text-gray-500 text-sm mt-4 leading-relaxed">
-            Enviá tu CV a todos los empleadores de la estación en minutos.
-          </p>
         </div>
 
-        <div className="mt-8">
+        <ImageCarousel />
+
+        <p className="text-gray-500 text-sm leading-relaxed text-center">
+          Enviá tu CV a todos los empleadores de la estación en minutos.
+        </p>
+
+        <div className="mt-6">
           <button
             onClick={onSignIn}
             disabled={signingIn}
@@ -258,7 +328,7 @@ function LoginView({
           </button>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-5">
+        <p className="text-center text-xs text-gray-400 mt-4">
           Solo pedimos permiso para enviar emails desde tu cuenta.
         </p>
       </Card>
@@ -275,9 +345,7 @@ function LoadingView() {
           <p className="font-display text-3xl text-french-blue mb-4">The Annex</p>
           <Loader2 className="animate-spin text-french-blue w-12 h-12 mx-auto" />
           <p className="text-lg font-semibold text-gray-800 mt-4">Iniciando proceso...</p>
-          <p className="text-sm text-gray-400 mt-2">
-            Esto puede tardar varios minutos. ☕
-          </p>
+          <p className="text-sm text-gray-400 mt-2">Esto puede tardar varios minutos. ☕</p>
           <div className="flex justify-center gap-1 mt-6">
             <div className="w-2 h-2 rounded-full bg-french-blue animate-bounce" style={{ animationDelay: "0ms" }} />
             <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -304,6 +372,7 @@ function FormView({
     languages: "",
     availFrom: "",
     availTo: "",
+    hasEUPassport: false,
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isDragOver, setIsDragOver] = useState(false);
@@ -317,8 +386,17 @@ function FormView({
     if (data.jobTypes.length === 0)
       errs.jobTypes = "Selecciona al menos un tipo de trabajo";
     if (!data.languages.trim()) errs.languages = "Indica al menos un idioma";
-    if (!data.availFrom || !data.availTo)
+    if (!data.availFrom || !data.availTo) {
       errs.dates = "Indica las fechas de disponibilidad";
+    } else if (!isValidDate(data.availFrom) || !isValidDate(data.availTo)) {
+      errs.dates = "Formato: dd/mm/aaaa (ej: 15/12/2025)";
+    } else {
+      const [fd, fm, fy] = data.availFrom.split("/").map(Number);
+      const [td, tm, ty] = data.availTo.split("/").map(Number);
+      const from = new Date(fy, fm - 1, fd);
+      const to   = new Date(ty, tm - 1, td);
+      if (from >= to) errs.dates = "La fecha de inicio debe ser anterior a la de fin";
+    }
     return errs;
   }
 
@@ -362,6 +440,7 @@ function FormView({
           languages: formData.languages,
           availFrom: formData.availFrom,
           availTo: formData.availTo,
+          hasEUPassport: formData.hasEUPassport,
           accessToken: session.access_token,
         }),
       }).catch(() => {});
@@ -416,6 +495,26 @@ function FormView({
               {errors.name && <p className="text-sm text-french-red mt-1">{errors.name}</p>}
             </div>
 
+            {/* Pasaporte europeo */}
+            <label className={`flex items-center gap-3 cursor-pointer rounded-xl border-2 px-4 py-3 transition-all duration-150 ${
+              formData.hasEUPassport
+                ? "border-french-blue bg-blue-50"
+                : "border-gray-200 hover:border-gray-300"
+            }`}>
+              <input
+                type="checkbox"
+                checked={formData.hasEUPassport}
+                onChange={(e) => setFormData((d) => ({ ...d, hasEUPassport: e.target.checked }))}
+                className="accent-french-blue w-4 h-4 flex-shrink-0"
+              />
+              <div>
+                <p className={`text-sm font-semibold ${formData.hasEUPassport ? "text-french-blue" : "text-gray-700"}`}>
+                  Tengo pasaporte europeo 🇪🇺
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">Pasaporte de algún país de la Unión Europea</p>
+              </div>
+            </label>
+
             {/* CV */}
             <div>
               <label className="text-sm font-semibold text-gray-700">
@@ -454,9 +553,7 @@ function FormView({
                       : "border-gray-200 hover:border-french-blue hover:bg-blue-50"
                   }`}
                 >
-                  <p className="text-sm font-medium text-gray-600">
-                    Arrastra tu CV o haz click
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Arrastra tu CV o haz click</p>
                   <p className="text-xs text-gray-400 mt-1">PDF · Max 5 MB</p>
                 </div>
               )}
@@ -543,13 +640,15 @@ function FormView({
                   </label>
                   <input
                     id="availFrom"
-                    type="date"
+                    type="text"
                     value={formData.availFrom}
                     onChange={(e) => setFormData((d) => ({ ...d, availFrom: e.target.value }))}
                     onBlur={() => {
                       const errs = validate(formData);
                       setErrors((e) => ({ ...e, dates: errs.dates }));
                     }}
+                    placeholder="dd/mm/aaaa"
+                    maxLength={10}
                     className={`text-base w-full border-2 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors ${
                       errors.dates ? "border-french-red" : "border-gray-200 hover:border-gray-300"
                     }`}
@@ -561,13 +660,15 @@ function FormView({
                   </label>
                   <input
                     id="availTo"
-                    type="date"
+                    type="text"
                     value={formData.availTo}
                     onChange={(e) => setFormData((d) => ({ ...d, availTo: e.target.value }))}
                     onBlur={() => {
                       const errs = validate(formData);
                       setErrors((e) => ({ ...e, dates: errs.dates }));
                     }}
+                    placeholder="dd/mm/aaaa"
+                    maxLength={10}
                     className={`text-base w-full border-2 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors ${
                       errors.dates ? "border-french-red" : "border-gray-200 hover:border-gray-300"
                     }`}
