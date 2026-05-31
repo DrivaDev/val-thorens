@@ -21,18 +21,18 @@ See: .planning/PROJECT.md
 ## Current Position
 
 **Active phase:** Phase 2 — Pipeline (executing)
-**Active plan:** 02-04 (Wave 2 — sheets.ts + scrape route)
-**Last completed:** 02-03 — lib/gemini.ts + lib/gmail.ts
+**Active plan:** 02-05 (Wave 3 — run/route.ts pipeline orchestrator)
+**Last completed:** 02-04 — lib/sheets.ts + app/api/scrape/route.ts
 
 ```
-Progress: [✓] Phase 1  [3/5] Phase 2  [ ] Phase 3
+Progress: [✓] Phase 1  [4/5] Phase 2  [ ] Phase 3
 ```
 
 ## Performance Metrics
 
-- Plans completed: 3
+- Plans completed: 4
 - Phases completed: 0
-- Requirements delivered: 19 / 37
+- Requirements delivered: 22 / 37
 
 ## Accumulated Context
 
@@ -47,6 +47,8 @@ Progress: [✓] Phase 1  [3/5] Phase 2  [ ] Phase 3
 - CandidateData interface omits hasEUPassport — plan contract does not require it for v1
 - Content-Transfer-Encoding: quoted-printable added to MIME text part — RFC 2822 best practice
 - MIME boundary uses Date.now() + Math.random() suffix for per-call uniqueness
+- logToSheets() defers error handling to caller (run/route.ts) — pipeline must not abort on Sheets failure
+- URL scheme validated with new URL() + protocol check before calling scrapeEmail() — mitigates T-02-04-02
 
 ### Constraints to Keep in Mind
 - Vercel `maxDuration: 300` required for run route (Pro plan)
@@ -64,5 +66,5 @@ Progress: [✓] Phase 1  [3/5] Phase 2  [ ] Phase 3
 
 ## Session Continuity
 
-Next action: Continue Phase 2 execution — run plan 02-04 (lib/sheets.ts + app/api/scrape/route.ts).
-Last session: 2026-05-31 — Completed 02-03-PLAN.md (lib/gemini.ts + lib/gmail.ts).
+Next action: Continue Phase 2 execution — run plan 02-05 (app/api/run/route.ts pipeline orchestrator + SSE).
+Last session: 2026-05-31 — Completed 02-04-PLAN.md (lib/sheets.ts + app/api/scrape/route.ts).

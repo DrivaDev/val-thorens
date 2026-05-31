@@ -62,9 +62,9 @@
 
 ### Sheets Logging
 
-- [ ] **SHTS-01**: After each successful send, app appends a row to Google Sheet ID `1Sq8Uy0SdeMrbIxHbUAcZ4Dsc1K2QufeZify4pL59Dek`
-- [ ] **SHTS-02**: Row columns: A=user name, B=employer name, C="No" (responded)
-- [ ] **SHTS-03**: App authenticates to Sheets API via Google Service Account JSON (env var)
+- [x] **SHTS-01**: After each successful send, app appends a row to Google Sheet ID `1Sq8Uy0SdeMrbIxHbUAcZ4Dsc1K2QufeZify4pL59Dek`
+- [x] **SHTS-02**: Row columns: A=user name, B=employer name, C="No" (responded)
+- [x] **SHTS-03**: App authenticates to Sheets API via Google Service Account JSON (env var)
 
 ## v2 Requirements
 
@@ -123,9 +123,9 @@
 | SEND-02 | Phase 2 - Pipeline | Pending |
 | SEND-03 | Phase 2 - Pipeline | Pending |
 | SEND-04 | Phase 2 - Pipeline | Pending |
-| SHTS-01 | Phase 2 - Pipeline | Pending |
-| SHTS-02 | Phase 2 - Pipeline | Pending |
-| SHTS-03 | Phase 2 - Pipeline | Pending |
+| SHTS-01 | Phase 2 - Pipeline | Complete |
+| SHTS-02 | Phase 2 - Pipeline | Complete |
+| SHTS-03 | Phase 2 - Pipeline | Complete |
 | PROG-01 | Phase 3 - Real-Time UX | Pending |
 | PROG-02 | Phase 3 - Real-Time UX | Pending |
 | PROG-03 | Phase 3 - Real-Time UX | Pending |

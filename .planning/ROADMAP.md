@@ -52,7 +52,7 @@ Plans:
 - **Wave 2** *(bloqueado en Wave 1)*
   - [x] 02-02-PLAN.md — lib/places.ts (discovery Places API) + lib/scraper.ts (Puppeteer email scraping)
   - [x] 02-03-PLAN.md — lib/gemini.ts (generación email Gemini + retry 429) + lib/gmail.ts (envío MIME Gmail API)
-  - [ ] 02-04-PLAN.md — lib/sheets.ts (logging Sheets Service Account) + app/api/scrape/route.ts (endpoint Puppeteer)
+  - [x] 02-04-PLAN.md — lib/sheets.ts (logging Sheets Service Account) + app/api/scrape/route.ts (endpoint Puppeteer)
 - **Wave 3** *(bloqueado en Wave 2)*
   - [ ] 02-05-PLAN.md — app/api/run/route.ts: orquestador SSE del pipeline completo (4 etapas)
 
@@ -82,5 +82,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth & Form | 3/3 | Complete | 2026-05-31 |
-| 2. Pipeline | 3/5 | In Progress | - |
+| 2. Pipeline | 4/5 | In Progress | - |
 | 3. Real-Time UX | 0/0 | Not started | - |
