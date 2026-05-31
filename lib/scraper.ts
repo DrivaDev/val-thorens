@@ -55,7 +55,8 @@ export async function scrapeEmail(url: string): Promise<string | null> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function extractEmails(page: any): Promise<string[]> {
   return page.evaluate(() => {
-    const emails: string[] = [];
+    // WR-06: usar Set con normalización lowercase para deduplicar correctamente
+    const seen = new Set<string>();
 
     // Extraer de mailto: links
     document.querySelectorAll('a[href^="mailto:"]').forEach((a) => {
@@ -63,14 +64,15 @@ async function extractEmails(page: any): Promise<string[]> {
         .replace('mailto:', '')
         .split('?')[0]
         .trim();
-      if (email && email.includes('@')) emails.push(email);
+      if (email && email.includes('@')) seen.add(email.toLowerCase());
     });
 
     // Extraer por regex en el texto de la página
     const text = document.body?.innerText || '';
     const matches = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
+    matches.forEach((e: string) => seen.add(e.toLowerCase()));
 
-    return Array.from(new Set(emails.concat(matches)));
+    return Array.from(seen);
   });
 }
 
