@@ -939,7 +939,7 @@ function FormView({
                   Enviando...
                 </span>
               ) : (
-                "Enviar candidatura 🚀"
+                "Chequear mail 🚀"
               )}
             </button>
           </form>
