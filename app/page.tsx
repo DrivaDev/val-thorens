@@ -59,7 +59,7 @@ function ImageCarousel() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((c) => (c + 1) % CAROUSEL_IMAGES.length);
-    }, 4000);
+    }, 7000);
     return () => clearInterval(timer);
   }, []);
 
@@ -75,23 +75,10 @@ function ImageCarousel() {
           src={src}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
           style={{ opacity: i === current ? 1 : 0 }}
         />
       ))}
-      {/* Dot indicators */}
-      <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
-        {CAROUSEL_IMAGES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            aria-label={`Foto ${i + 1}`}
-            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-              i === current ? "bg-white scale-125" : "bg-white/50"
-            }`}
-          />
-        ))}
-      </div>
     </div>
   );
 }
