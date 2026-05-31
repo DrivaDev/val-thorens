@@ -25,6 +25,8 @@ function sleep(ms: number) {
 
 export async function discoverEmployers(): Promise<Employer[]> {
   const allEmployers = new Map<string, Employer>(); // dedup por placeId
+  // WR-04: contador global de requests para aplicar rate limit entre queries también
+  let requestCount = 0;
 
   for (const query of VAL_THORENS_QUERIES) {
     try {
@@ -32,7 +34,9 @@ export async function discoverEmployers(): Promise<Employer[]> {
       let page = 0;
 
       do {
-        if (page > 0) await sleep(1000); // DISC-05: rate limit 1 req/s entre páginas
+        // DISC-05: rate limit 1 req/s — aplicar entre todas las requests, no solo entre páginas
+        if (requestCount > 0) await sleep(1000);
+        requestCount++;
 
         const bodyPayload: Record<string, unknown> = { textQuery: query, pageSize: 20 };
         if (pageToken) bodyPayload.pageToken = pageToken;
