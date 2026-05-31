@@ -4,7 +4,7 @@
 
 - [x] **Phase 1: Auth & Form** - User can authenticate with Google and submit their job application data
 - [x] **Phase 2: Pipeline** - App discovers employers, scrapes emails, generates cover emails, sends them, and logs to Sheets
-- [ ] **Phase 3: Real-Time UX** - User sees live progress during the pipeline run and a final results summary
+- [x] **Phase 3: Real-Time UX** - User sees live progress during the pipeline run and a final results summary
 
 ---
 
@@ -76,7 +76,7 @@ Plans:
 
 Plans:
 - **Wave 1**
-  - [ ] 03-01-PLAN.md — app/page.tsx: ProgressView (consumidor SSE + log en vivo con auto-scroll + tarjeta de resumen + reset) y plumbing del estado progress en Home/FormView
+  - [x] 03-01-PLAN.md — app/page.tsx: ProgressView (consumidor SSE + log en vivo con auto-scroll + tarjeta de resumen + reset) y plumbing del estado progress en Home/FormView
 
 **UI hint**: yes
 
@@ -88,4 +88,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Auth & Form | 3/3 | Complete | 2026-05-31 |
 | 2. Pipeline | 5/5 | Complete | 2026-05-31 |
-| 3. Real-Time UX | 0/1 | Not started | - |
+| 3. Real-Time UX | 1/1 | Complete | 2026-05-31 |
