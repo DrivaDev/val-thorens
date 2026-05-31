@@ -147,16 +147,15 @@ export async function POST(request: Request) {
             const emailBody = await generateEmailBody(candidate, { name: employer.name });
 
             // ETAPA 4: ENVÍO
-            // DRY_RUN: comentado para prueba local — descomentar para envío real
-            // await sendEmail({
-            //   accessToken,
-            //   to: email,
-            //   subject: emailSubject,
-            //   body: emailBody,
-            //   cvBase64: cvBase64Data,
-            //   cvFilename: 'CV.pdf',
-            //   fromEmail,
-            // });
+            await sendEmail({
+              accessToken,
+              to: email,
+              subject: emailSubject,
+              body: emailBody,
+              cvBase64: cvBase64Data,
+              cvFilename: 'CV.pdf',
+              fromEmail,
+            });
 
             sentCount++;
             controller.enqueue(sseEvent({ type: 'sent', employer: employer.name, email }));
