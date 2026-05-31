@@ -1,31 +1,31 @@
 # Project State
 
 ## Status
-Phase: 2 (Ready to plan)
-Last updated: 2026-05-29
+Phase: 2 (Ready to execute)
+Last updated: 2026-05-31
 
 ## Project Reference
 See: .planning/PROJECT.md
 
 **Core value:** User authenticates once and their CV is automatically sent to every relevant employer in Val Thorens with a personalized email in their name.
-**Current focus:** Phase 1
+**Current focus:** Phase 2
 
 ## Phases
 
 | Phase | Name | Status |
 |-------|------|--------|
 | 1 | Auth & Form | ✅ complete |
-| 2 | Pipeline | pending |
+| 2 | Pipeline | 🗂 planned (5 plans) |
 | 3 | Real-Time UX | pending |
 
 ## Current Position
 
-**Active phase:** Phase 2 — Pipeline (not started)
-**Active plan:** None (Phase 2 not started)
-**Last completed:** —
+**Active phase:** Phase 2 — Pipeline (ready to execute)
+**Active plan:** None (Phase 2 planned, not started)
+**Last completed:** Phase 1 — Auth & Form
 
 ```
-Progress: [P] Phase 1  [ ] Phase 2  [ ] Phase 3
+Progress: [✓] Phase 1  [P] Phase 2  [ ] Phase 3
 ```
 
 ## Performance Metrics
@@ -59,4 +59,4 @@ Progress: [P] Phase 1  [ ] Phase 2  [ ] Phase 3
 
 ## Session Continuity
 
-Next action: Run `/gsd-execute-phase 1` to execute Phase 1 (3 plans, waves 1→2→3).
+Next action: Run `/gsd-execute-phase 2` to execute Phase 2 (5 plans, waves 1→2→3).
