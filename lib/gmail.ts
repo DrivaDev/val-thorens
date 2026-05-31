@@ -11,19 +11,25 @@ export interface SendEmailParams {
 export async function sendEmail(params: SendEmailParams): Promise<void> {
   const boundary = `boundary_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
+  // WR-01: codificar el asunto con RFC 2047 base64 para soportar caracteres no-ASCII
+  const encodedSubject = `=?UTF-8?B?${Buffer.from(params.subject).toString('base64')}?=`;
+
+  // CR-04: codificar el cuerpo en base64 (no raw UTF-8 con cabecera quoted-printable)
+  const bodyB64 = Buffer.from(params.body, 'utf-8').toString('base64');
+
   // SEND-01: construir mensaje MIME RFC 2822 multipart/mixed con body texto y adjunto PDF
   const mimeMessage = [
     `From: ${params.fromEmail}`,
     `To: ${params.to}`,
-    `Subject: ${params.subject}`,
+    `Subject: ${encodedSubject}`,
     'MIME-Version: 1.0',
     `Content-Type: multipart/mixed; boundary="${boundary}"`,
     '',
     `--${boundary}`,
     'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: quoted-printable',
+    'Content-Transfer-Encoding: base64',
     '',
-    params.body,
+    bodyB64,
     '',
     `--${boundary}`,
     'Content-Type: application/pdf',
