@@ -72,7 +72,12 @@ Plans:
   2. Each SSE event covers the full status spectrum: searching, found count, scraping progress, send status per employer, sheets logging, and completion
   3. At the end of the run, a summary card shows emails sent count, employers skipped count, and Sheets log confirmation
   4. User can click "Volver al formulario" to reset and run the pipeline again
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- **Wave 1**
+  - [ ] 03-01-PLAN.md — app/page.tsx: ProgressView (consumidor SSE + log en vivo con auto-scroll + tarjeta de resumen + reset) y plumbing del estado progress en Home/FormView
+
 **UI hint**: yes
 
 ---
@@ -83,4 +88,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Auth & Form | 3/3 | Complete | 2026-05-31 |
 | 2. Pipeline | 5/5 | Complete | 2026-05-31 |
-| 3. Real-Time UX | 0/0 | Not started | - |
+| 3. Real-Time UX | 0/1 | Not started | - |
