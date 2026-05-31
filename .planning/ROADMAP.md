@@ -2,7 +2,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Auth & Form** - User can authenticate with Google and submit their job application data
+- [x] **Phase 1: Auth & Form** - User can authenticate with Google and submit their job application data
 - [ ] **Phase 2: Pipeline** - App discovers employers, scrapes emails, generates cover emails, sends them, and logs to Sheets
 - [ ] **Phase 3: Real-Time UX** - User sees live progress during the pipeline run and a final results summary
 
@@ -23,11 +23,11 @@
 
 Plans:
 - **Wave 1**
-  - [ ] 01-01-PLAN.md — Bootstrap: NextAuth Google OAuth + tailwind custom colors + .env.example + vercel.json
+  - [x] 01-01-PLAN.md — Bootstrap: NextAuth Google OAuth + tailwind custom colors + .env.example + vercel.json
 - **Wave 2** *(blocked on Wave 1)*
-  - [ ] 01-02-PLAN.md — Page shell: app/page.tsx 3-state component (Login + Loading screens) + root layout
+  - [x] 01-02-PLAN.md — Page shell: app/page.tsx 3-state component (Login + Loading screens) + root layout
 - **Wave 3** *(blocked on Wave 2)*
-  - [ ] 01-03-PLAN.md — Form screen: all 5 fields, validation, PDF drag-drop, Base64 conversion, submit handler
+  - [x] 01-03-PLAN.md — Form screen: all 5 fields, validation, PDF drag-drop, Base64 conversion, submit handler
 
 **Cross-cutting constraints:**
 - NextAuth session callback must expose `access_token` for downstream Gmail API
@@ -64,6 +64,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth & Form | 0/3 | Planned | - |
+| 1. Auth & Form | 3/3 | Complete | 2026-05-31 |
 | 2. Pipeline | 0/0 | Not started | - |
 | 3. Real-Time UX | 0/0 | Not started | - |
