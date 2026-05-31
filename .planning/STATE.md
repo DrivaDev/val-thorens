@@ -21,18 +21,18 @@ See: .planning/PROJECT.md
 ## Current Position
 
 **Active phase:** Phase 2 — Pipeline (executing)
-**Active plan:** 02-02 (Wave 2 — places.ts + scraper.ts)
-**Last completed:** 02-01 — Deps + next.config.mjs
+**Active plan:** 02-03 (Wave 2 — gemini.ts + gmail.ts)
+**Last completed:** 02-02 — lib/places.ts + lib/scraper.ts
 
 ```
-Progress: [✓] Phase 1  [1/5] Phase 2  [ ] Phase 3
+Progress: [✓] Phase 1  [2/5] Phase 2  [ ] Phase 3
 ```
 
 ## Performance Metrics
 
-- Plans completed: 1
+- Plans completed: 2
 - Phases completed: 0
-- Requirements delivered: 1 / 37
+- Requirements delivered: 11 / 37
 
 ## Accumulated Context
 
@@ -42,6 +42,8 @@ Progress: [✓] Phase 1  [1/5] Phase 2  [ ] Phase 3
 - SSE via ReadableStream — compatible with Next.js App Router, no WebSockets
 - @sparticuz/chromium + puppeteer-core — required for Vercel serverless compatibility
 - Gemini 2.0 Flash for email generation — free tier, fast, sufficient quality
+- Array.from(new Set()) inside page.evaluate() — avoids TypeScript downlevelIteration error
+- URL scheme validation (http/https) before page.goto() — mitigates T-02-02-01 Tampering threat
 
 ### Constraints to Keep in Mind
 - Vercel `maxDuration: 300` required for run route (Pro plan)
@@ -59,5 +61,5 @@ Progress: [✓] Phase 1  [1/5] Phase 2  [ ] Phase 3
 
 ## Session Continuity
 
-Next action: Continue Phase 2 execution — run plan 02-02 (lib/places.ts + lib/scraper.ts).
-Last session: 2026-05-31 — Completed 02-01-PLAN.md (deps + next.config.mjs).
+Next action: Continue Phase 2 execution — run plan 02-03 (lib/gemini.ts + lib/gmail.ts).
+Last session: 2026-05-31 — Completed 02-02-PLAN.md (lib/places.ts + lib/scraper.ts).
