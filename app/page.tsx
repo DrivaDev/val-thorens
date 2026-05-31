@@ -622,14 +622,18 @@ function FormView({
           hasEUPassport: formData.hasEUPassport,
         }),
       });
-      if (!res.ok) throw new Error("Error al generar el template");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? `HTTP ${res.status}`);
+      }
       const { template, subject } = await res.json();
       setIsSubmitting(false);
       onSubmitTemplate({ template, subject, formData });
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       setErrors((e) => ({
         ...e,
-        submit: "Error al generar el email. Intentalo de nuevo.",
+        submit: `Error al generar el email: ${msg}`,
       }));
       setIsSubmitting(false);
     }

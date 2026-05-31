@@ -38,7 +38,15 @@ export async function POST(request: Request) {
 
   const currentYear = new Date().getFullYear();
   const subject = `Job Application - Winter Season ${currentYear} - ${body.name}`;
-  const template = await generateEmailTemplate(candidate);
+
+  let template: string;
+  try {
+    template = await generateEmailTemplate(candidate);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[template] Gemini error:', msg);
+    return Response.json({ error: `Gemini error: ${msg}` }, { status: 502 });
+  }
 
   return Response.json({ template, subject });
 }
