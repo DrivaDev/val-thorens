@@ -95,7 +95,7 @@ export async function POST(request: Request) {
 
   // GEN-03: asunto hardcodeado con año actual
   const currentYear = new Date().getFullYear();
-  const emailSubject = `Candidature - Saison d'hiver ${currentYear} - ${name}`;
+  const emailSubject = `Job Application - Winter Season ${currentYear} - ${name}`;
 
   const candidate: CandidateData = {
     name,
