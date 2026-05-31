@@ -28,6 +28,24 @@ export async function POST(request: Request) {
     });
   }
 
+  // CR-01: leer el access token desde la sesión verificada, no desde el body del cliente
+  const accessToken = (session as { access_token?: string; user?: { email?: string; name?: string } }).access_token;
+  if (!accessToken) {
+    return new Response(JSON.stringify({ error: 'No access token in session' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // WR-02: verificar email del usuario antes de ejecutar el pipeline
+  const fromEmail = session.user?.email;
+  if (!fromEmail) {
+    return new Response(JSON.stringify({ error: 'Session user email not available' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // Parsear y validar el body del POST
   let body: {
     name: string;
@@ -36,7 +54,6 @@ export async function POST(request: Request) {
     languages: string;
     availFrom: string;
     availTo: string;
-    accessToken: string;
   };
 
   try {
@@ -48,11 +65,25 @@ export async function POST(request: Request) {
     });
   }
 
-  const { name, cvBase64, jobTypes, languages, availFrom, availTo, accessToken } = body;
+  const { name, cvBase64, jobTypes, languages, availFrom, availTo } = body;
 
   // ASVS V5: validar campos requeridos antes del pipeline
-  if (!name || !cvBase64 || !accessToken) {
-    return new Response(JSON.stringify({ error: 'Missing required fields: name, cvBase64, accessToken' }), {
+  if (!name || !cvBase64) {
+    return new Response(JSON.stringify({ error: 'Missing required fields: name, cvBase64' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // CR-03: validar longitud de campos para prevenir prompt injection
+  if (name.length > 100 || languages.length > 200) {
+    return new Response(JSON.stringify({ error: 'Field too long: name (max 100), languages (max 200)' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  if (Array.isArray(jobTypes) && jobTypes.some((jt) => jt.length > 50)) {
+    return new Response(JSON.stringify({ error: 'Field too long: each jobType must be <= 50 characters' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -65,8 +96,6 @@ export async function POST(request: Request) {
   // GEN-03: asunto hardcodeado con año actual
   const currentYear = new Date().getFullYear();
   const emailSubject = `Candidature - Saison d'hiver ${currentYear} - ${name}`;
-
-  const fromEmail = session.user?.email ?? '';
 
   const candidate: CandidateData = {
     name,
@@ -92,6 +121,9 @@ export async function POST(request: Request) {
         // ─── ETAPAS 2-4: POR EMPLEADOR ────────────────────────────────────
         for (const employer of employers) {
           try {
+            // WR-03: rate limit al inicio del loop, solo si ya enviamos al menos uno
+            if (sentCount > 0) await sleep(4000); // SEND-03: 4s entre envíos
+
             // ETAPA 2: SCRAPING
             // Sin website: emitir scraping con null y saltar
             if (!employer.website) {
@@ -127,9 +159,6 @@ export async function POST(request: Request) {
 
             sentCount++;
             controller.enqueue(sseEvent({ type: 'sent', employer: employer.name, email }));
-
-            // SEND-03: esperar 4 segundos entre envíos
-            await sleep(4000);
 
             // LOGGING: registrar en Sheets (graceful — no abortar si falla)
             try {
