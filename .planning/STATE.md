@@ -20,19 +20,19 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-**Active phase:** Phase 2 — Pipeline (executing)
-**Active plan:** 02-05 (Wave 3 — run/route.ts pipeline orchestrator)
-**Last completed:** 02-04 — lib/sheets.ts + app/api/scrape/route.ts
+**Active phase:** Phase 3 — Real-Time UX (pending)
+**Active plan:** 03-01 (next)
+**Last completed:** 02-05 — app/api/run/route.ts SSE pipeline orchestrator
 
 ```
-Progress: [✓] Phase 1  [4/5] Phase 2  [ ] Phase 3
+Progress: [✓] Phase 1  [✓] Phase 2  [ ] Phase 3
 ```
 
 ## Performance Metrics
 
-- Plans completed: 4
-- Phases completed: 0
-- Requirements delivered: 22 / 37
+- Plans completed: 5
+- Phases completed: 1
+- Requirements delivered: 43 / 43 (Phase 2 complete)
 
 ## Accumulated Context
 
@@ -49,6 +49,8 @@ Progress: [✓] Phase 1  [4/5] Phase 2  [ ] Phase 3
 - MIME boundary uses Date.now() + Math.random() suffix for per-call uniqueness
 - logToSheets() defers error handling to caller (run/route.ts) — pipeline must not abort on Sheets failure
 - URL scheme validated with new URL() + protocol check before calling scrapeEmail() — mitigates T-02-04-02
+- authOptions extracted to lib/auth.ts — cleaner single source of truth for NextAuth config; imported by both nextauth route and run/route.ts
+- getServerSession(authOptions) with explicit authOptions — required in NextAuth v4 + App Router (omitting authOptions causes getServerSession to always return null)
 
 ### Constraints to Keep in Mind
 - Vercel `maxDuration: 300` required for run route (Pro plan)
@@ -66,5 +68,5 @@ Progress: [✓] Phase 1  [4/5] Phase 2  [ ] Phase 3
 
 ## Session Continuity
 
-Next action: Continue Phase 2 execution — run plan 02-05 (app/api/run/route.ts pipeline orchestrator + SSE).
-Last session: 2026-05-31 — Completed 02-04-PLAN.md (lib/sheets.ts + app/api/scrape/route.ts).
+Next action: Plan and execute Phase 3 — Real-Time UX (SSE consumer + progress UI + results summary).
+Last session: 2026-05-31 — Completed 02-05-PLAN.md (app/api/run/route.ts SSE pipeline orchestrator). Phase 2 complete.

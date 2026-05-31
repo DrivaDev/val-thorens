@@ -3,7 +3,7 @@
 ## Phases
 
 - [x] **Phase 1: Auth & Form** - User can authenticate with Google and submit their job application data
-- [ ] **Phase 2: Pipeline** - App discovers employers, scrapes emails, generates cover emails, sends them, and logs to Sheets
+- [x] **Phase 2: Pipeline** - App discovers employers, scrapes emails, generates cover emails, sends them, and logs to Sheets
 - [ ] **Phase 3: Real-Time UX** - User sees live progress during the pipeline run and a final results summary
 
 ---
@@ -54,7 +54,7 @@ Plans:
   - [x] 02-03-PLAN.md — lib/gemini.ts (generación email Gemini + retry 429) + lib/gmail.ts (envío MIME Gmail API)
   - [x] 02-04-PLAN.md — lib/sheets.ts (logging Sheets Service Account) + app/api/scrape/route.ts (endpoint Puppeteer)
 - **Wave 3** *(bloqueado en Wave 2)*
-  - [ ] 02-05-PLAN.md — app/api/run/route.ts: orquestador SSE del pipeline completo (4 etapas)
+  - [x] 02-05-PLAN.md — app/api/run/route.ts: orquestador SSE del pipeline completo (4 etapas)
 
 **Cross-cutting constraints:**
 - @sparticuz/chromium + puppeteer-core — nunca el paquete puppeteer completo
@@ -82,5 +82,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth & Form | 3/3 | Complete | 2026-05-31 |
-| 2. Pipeline | 4/5 | In Progress | - |
+| 2. Pipeline | 5/5 | Complete | 2026-05-31 |
 | 3. Real-Time UX | 0/0 | Not started | - |
