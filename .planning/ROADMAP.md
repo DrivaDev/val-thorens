@@ -44,7 +44,24 @@ Plans:
   2. Each employer with a website is scraped for contact email; employers without any email are marked skipped without aborting the run
   3. Each employer with an email receives a personalized French email (with CV attachment) sent from the user's own Gmail account; Gemini 429s are retried
   4. Every successful send appends a row (user name, employer name, "No") to the configured Google Sheet
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- **Wave 1**
+  - [ ] 02-01-PLAN.md — Dependencias del pipeline: instalar @sparticuz/chromium, puppeteer-core, @google/generative-ai, googleapis + configurar next.config.mjs
+- **Wave 2** *(bloqueado en Wave 1)*
+  - [ ] 02-02-PLAN.md — lib/places.ts (discovery Places API) + lib/scraper.ts (Puppeteer email scraping)
+  - [ ] 02-03-PLAN.md — lib/gemini.ts (generación email Gemini + retry 429) + lib/gmail.ts (envío MIME Gmail API)
+  - [ ] 02-04-PLAN.md — lib/sheets.ts (logging Sheets Service Account) + app/api/scrape/route.ts (endpoint Puppeteer)
+- **Wave 3** *(bloqueado en Wave 2)*
+  - [ ] 02-05-PLAN.md — app/api/run/route.ts: orquestador SSE del pipeline completo (4 etapas)
+
+**Cross-cutting constraints:**
+- @sparticuz/chromium + puppeteer-core — nunca el paquete puppeteer completo
+- SSE via ReadableStream — no WebSockets
+- CV base64 en memoria solo — nunca a disco
+- accessToken del usuario para Gmail — nunca service account para envío de emails
+- Rate limits: Places 1 req/s, Gmail 4s entre envíos, Gemini 429 retry exponencial
 
 ### Phase 3: Real-Time UX
 **Goal**: Users can watch the pipeline run live and get a clear summary of what was sent and what was skipped
@@ -65,5 +82,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth & Form | 3/3 | Complete | 2026-05-31 |
-| 2. Pipeline | 0/0 | Not started | - |
+| 2. Pipeline | 0/5 | Planned | - |
 | 3. Real-Time UX | 0/0 | Not started | - |
