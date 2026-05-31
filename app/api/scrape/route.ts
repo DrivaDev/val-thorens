@@ -1,6 +1,17 @@
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { scrapeEmail } from '@/lib/scraper';
 
 export async function POST(request: Request) {
+  // CR-02: autenticar antes de lanzar Puppeteer
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   let url: string;
 
   try {
