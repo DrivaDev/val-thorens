@@ -1,6 +1,41 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { generateEmailTemplate, CandidateData, LanguageEntry } from '@/lib/gemini';
+import { LanguageEntry } from '@/lib/gemini';
+
+function buildTemplate(params: {
+  name: string;
+  jobTypes: string[];
+  languages: LanguageEntry[];
+  availFrom: string;
+  availTo: string;
+  hasEUPassport: boolean;
+}): string {
+  const languagesStr = params.languages
+    .filter(l => l.language.trim())
+    .map(l => `${l.language} (${l.level})`)
+    .join(', ');
+
+  const jobTypesStr = params.jobTypes.join(', ');
+
+  const passportLine = params.hasEUPassport
+    ? `\nI hold a European Union passport, which grants me full work authorization in France.`
+    : '';
+
+  return `Dear [EMPLEADOR] Team,
+
+I am writing to express my interest in joining your team at [EMPLEADOR] for the upcoming winter season in Val Thorens. I am seeking a position in the field of ${jobTypesStr || '[RUBRO]'}, and I believe that [EMPLEADOR] would be a great fit for my profile.
+
+My name is ${params.name}, and I will be available from ${params.availFrom} to ${params.availTo}. I am enthusiastic, reliable, and eager to contribute to your team throughout the season.${passportLine}
+
+I speak the following languages: ${languagesStr || 'please see my CV'}.
+
+Please find my CV${params.hasEUPassport ? ' and a cover letter' : ''} attached to this email. I would be delighted to discuss any available opportunities with you.
+
+Thank you for your time and consideration. I look forward to hearing from you.
+
+Best regards,
+${params.name}`;
+}
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -27,26 +62,16 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Missing required field: name' }, { status: 400 });
   }
 
-  const candidate: CandidateData = {
+  const currentYear = new Date().getFullYear();
+  const subject = `Job Application - Winter Season ${currentYear} - ${body.name}`;
+  const template = buildTemplate({
     name: body.name,
     jobTypes: body.jobTypes ?? [],
     languages: body.languages ?? [],
     availFrom: body.availFrom ?? '',
     availTo: body.availTo ?? '',
     hasEUPassport: body.hasEUPassport ?? false,
-  };
-
-  const currentYear = new Date().getFullYear();
-  const subject = `Job Application - Winter Season ${currentYear} - ${body.name}`;
-
-  let template: string;
-  try {
-    template = await generateEmailTemplate(candidate);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error('[template] Gemini error:', msg);
-    return Response.json({ error: `Gemini error: ${msg}` }, { status: 502 });
-  }
+  });
 
   return Response.json({ template, subject });
 }
