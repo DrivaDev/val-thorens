@@ -9,7 +9,8 @@ export async function logToSheets(userName: string, employerName: string): Promi
   const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (!raw) throw new Error('[sheets] GOOGLE_SERVICE_ACCOUNT_JSON env var is not set');
 
-  let credentials: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let credentials: any;
   try {
     credentials = JSON.parse(raw);
   } catch {
