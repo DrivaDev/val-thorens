@@ -762,7 +762,7 @@ function FormView({
             <div>
               <label className="text-sm font-semibold text-gray-700">Tipo de trabajo</label>
               <div className="grid grid-cols-2 gap-2 mt-2">
-                {["Hotel", "Restaurante", "Bar", "Escuela de ski", "Tienda", "Otro"].map((type) => (
+                {RUBROS.map((type) => (
                   <label
                     key={type}
                     className={`flex items-center gap-2 text-sm cursor-pointer rounded-xl border-2 px-3 py-2 transition-all duration-150 ${
@@ -780,6 +780,9 @@ function FormView({
                           jobTypes: e.target.checked
                             ? [...d.jobTypes, type]
                             : d.jobTypes.filter((t) => t !== type),
+                          cartas: e.target.checked
+                            ? d.cartas
+                            : { ...d.cartas, [type]: null },
                         }));
                       }}
                       className="accent-french-blue"
@@ -791,6 +794,83 @@ function FormView({
               {errors.jobTypes && (
                 <p className="text-sm text-french-red mt-1">{errors.jobTypes}</p>
               )}
+            </div>
+
+            {/* Cartas de presentación */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700">
+                Cartas de presentación por rubro{" "}
+                <span className="text-gray-400 font-normal">(opcional)</span>
+              </label>
+              <p className="text-xs text-gray-400 mt-0.5 mb-3">
+                Se adjunta la carta del rubro correspondiente al empleador. Solo para rubros seleccionados. PDF · Max 5 MB.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {RUBROS.map((rubro) => {
+                  const carta = formData.cartas[rubro];
+                  const selected = formData.jobTypes.includes(rubro);
+                  return (
+                    <div
+                      key={rubro}
+                      className={`rounded-xl border-2 px-3 py-2 flex items-center justify-between gap-2 ${
+                        !selected
+                          ? "border-gray-100 bg-gray-50 opacity-40"
+                          : carta
+                          ? "border-green-200 bg-green-50"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-gray-700 truncate">{rubro}</p>
+                        {carta && selected && <p className="text-xs text-green-600">PDF cargado ✓</p>}
+                      </div>
+                      {selected && (
+                        carta ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormData((d) => ({
+                                ...d,
+                                cartas: { ...d.cartas, [rubro]: null },
+                              }))
+                            }
+                            className="p-1 rounded-full hover:bg-red-50 text-gray-400 hover:text-french-red transition-colors flex-shrink-0"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const input = document.createElement("input");
+                              input.type = "file";
+                              input.accept = "application/pdf";
+                              input.onchange = (ev) => {
+                                const file = (ev.target as HTMLInputElement).files?.[0];
+                                if (!file) return;
+                                if (file.type !== "application/pdf" || file.size > 5 * 1024 * 1024) return;
+                                const reader = new FileReader();
+                                reader.onload = (re) => {
+                                  const b64 = re.target?.result as string;
+                                  setFormData((d) => ({
+                                    ...d,
+                                    cartas: { ...d.cartas, [rubro]: b64 },
+                                  }));
+                                };
+                                reader.readAsDataURL(file);
+                              };
+                              input.click();
+                            }}
+                            className="text-xs text-french-blue font-semibold hover:underline flex-shrink-0"
+                          >
+                            Subir
+                          </button>
+                        )
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Idiomas */}
@@ -858,80 +938,6 @@ function FormView({
               {errors.languages && (
                 <p className="text-sm text-french-red mt-1">{errors.languages}</p>
               )}
-            </div>
-
-            {/* Cartas de presentación */}
-            <div>
-              <label className="text-sm font-semibold text-gray-700">
-                Cartas de presentación por rubro{" "}
-                <span className="text-gray-400 font-normal">(opcional)</span>
-              </label>
-              <p className="text-xs text-gray-400 mt-0.5 mb-3">
-                Se adjunta la carta del rubro correspondiente al empleador. PDF · Max 5 MB.
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {RUBROS.map((rubro) => {
-                  const carta = formData.cartas[rubro];
-                  return (
-                    <div
-                      key={rubro}
-                      className={`rounded-xl border-2 px-3 py-2 flex items-center justify-between gap-2 ${
-                        carta ? "border-green-200 bg-green-50" : "border-gray-200"
-                      }`}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-gray-700 truncate">{rubro}</p>
-                        {carta && <p className="text-xs text-green-600">PDF cargado ✓</p>}
-                      </div>
-                      {carta ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((d) => ({
-                              ...d,
-                              cartas: { ...d.cartas, [rubro]: null },
-                            }))
-                          }
-                          className="p-1 rounded-full hover:bg-red-50 text-gray-400 hover:text-french-red transition-colors flex-shrink-0"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const input = document.createElement("input");
-                            input.type = "file";
-                            input.accept = "application/pdf";
-                            input.onchange = (ev) => {
-                              const file = (ev.target as HTMLInputElement).files?.[0];
-                              if (!file) return;
-                              if (
-                                file.type !== "application/pdf" ||
-                                file.size > 5 * 1024 * 1024
-                              )
-                                return;
-                              const reader = new FileReader();
-                              reader.onload = (re) => {
-                                const b64 = re.target?.result as string;
-                                setFormData((d) => ({
-                                  ...d,
-                                  cartas: { ...d.cartas, [rubro]: b64 },
-                                }));
-                              };
-                              reader.readAsDataURL(file);
-                            };
-                            input.click();
-                          }}
-                          className="text-xs text-french-blue font-semibold hover:underline flex-shrink-0"
-                        >
-                          Subir
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
             </div>
 
             {/* Disponibilidad */}

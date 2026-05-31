@@ -2,9 +2,15 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { LanguageEntry } from '@/lib/gemini';
 
+const LEVEL_EN: Record<string, string> = {
+  'nativo': 'native',
+  'básico': 'basic',
+  'intermedio': 'intermediate',
+  'avanzado': 'advanced',
+};
+
 function buildTemplate(params: {
   name: string;
-  jobTypes: string[];
   languages: LanguageEntry[];
   availFrom: string;
   availTo: string;
@@ -12,10 +18,8 @@ function buildTemplate(params: {
 }): string {
   const languagesStr = params.languages
     .filter(l => l.language.trim())
-    .map(l => `${l.language} (${l.level})`)
+    .map(l => `${l.language} (${LEVEL_EN[l.level] ?? l.level})`)
     .join(', ');
-
-  const jobTypesStr = params.jobTypes.join(', ');
 
   const passportLine = params.hasEUPassport
     ? `\nI hold a European Union passport, which grants me full work authorization in France.`
@@ -23,7 +27,7 @@ function buildTemplate(params: {
 
   return `Dear [EMPLEADOR] Team,
 
-I am writing to express my interest in joining your team at [EMPLEADOR] for the upcoming winter season in Val Thorens. I am seeking a position in the field of ${jobTypesStr || '[RUBRO]'}, and I believe that [EMPLEADOR] would be a great fit for my profile.
+I am writing to express my interest in joining your team at [EMPLEADOR] for the upcoming winter season in Val Thorens. I am seeking a position in [RUBRO], and I believe that [EMPLEADOR] would be a great fit for my profile.
 
 My name is ${params.name}, and I will be available from ${params.availFrom} to ${params.availTo}. I am enthusiastic, reliable, and eager to contribute to your team throughout the season.${passportLine}
 
@@ -66,7 +70,6 @@ export async function POST(request: Request) {
   const subject = `Job Application - Winter Season ${currentYear} - ${body.name}`;
   const template = buildTemplate({
     name: body.name,
-    jobTypes: body.jobTypes ?? [],
     languages: body.languages ?? [],
     availFrom: body.availFrom ?? '',
     availTo: body.availTo ?? '',
