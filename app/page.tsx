@@ -220,18 +220,36 @@ function FlyingBackground() {
 }
 
 // ---------------------------------------------------------------------------
-// Interfaces
+// Interfaces & constants
 // ---------------------------------------------------------------------------
 
-interface FormData {
+const RUBROS = [
+  "Hotel",
+  "Bar/Restaurante",
+  "Escuela de Ski",
+  "Tienda",
+  "Rental",
+  "Centro de Ski",
+  "Spa/Bienestar",
+  "Guardería/Childcare",
+  "Otro",
+] as const;
+
+interface LanguageEntry {
+  language: string;
+  level: string;
+}
+
+interface ApplicationFormData {
   name: string;
   cv: File | null;
   cvBase64: string | null;
   jobTypes: string[];
-  languages: string;
+  languages: LanguageEntry[];
   availFrom: string;
   availTo: string;
   hasEUPassport: boolean;
+  cartas: Record<string, string | null>;
 }
 
 interface FormErrors {
@@ -241,6 +259,12 @@ interface FormErrors {
   languages?: string;
   dates?: string;
   submit?: string;
+}
+
+interface TemplateStartData {
+  template: string;
+  subject: string;
+  formData: ApplicationFormData;
 }
 
 // ---------------------------------------------------------------------------
@@ -513,33 +537,35 @@ function ProgressView({
 
 function FormView({
   session,
-  onSubmitStart,
+  onSubmitTemplate,
 }: {
   session: Session;
-  onSubmitStart: (response: Response) => void;
+  onSubmitTemplate: (data: TemplateStartData) => void;
 }) {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ApplicationFormData>({
     name: "",
     cv: null,
     cvBase64: null,
     jobTypes: [],
-    languages: "",
+    languages: [{ language: "", level: "nativo" }],
     availFrom: "",
     availTo: "",
     hasEUPassport: false,
+    cartas: {},
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isDragOver, setIsDragOver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function validate(data: FormData): FormErrors {
+  function validate(data: ApplicationFormData): FormErrors {
     const errs: FormErrors = {};
     if (!data.name.trim()) errs.name = "El nombre es obligatorio";
     if (!data.cv) errs.cv = "Solo se aceptan archivos PDF de hasta 5 MB";
     if (data.jobTypes.length === 0)
       errs.jobTypes = "Selecciona al menos un tipo de trabajo";
-    if (!data.languages.trim()) errs.languages = "Indica al menos un idioma";
+    if (data.languages.every(l => !l.language.trim()))
+      errs.languages = "Indica al menos un idioma";
     if (!data.availFrom || !data.availTo) {
       errs.dates = "Indica las fechas de disponibilidad";
     } else if (!isValidDate(data.availFrom) || !isValidDate(data.availTo)) {
@@ -584,28 +610,26 @@ function FormView({
     if (Object.keys(errs).length > 0) return;
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/run", {
+      const res = await fetch("/api/template", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
-          cvBase64: formData.cvBase64,
           jobTypes: formData.jobTypes,
-          languages: formData.languages,
+          languages: formData.languages.filter(l => l.language.trim()),
           availFrom: formData.availFrom,
           availTo: formData.availTo,
           hasEUPassport: formData.hasEUPassport,
         }),
       });
-      if (!response.ok || !response.body) {
-        throw new Error("El servidor rechazó la solicitud");
-      }
+      if (!res.ok) throw new Error("Error al generar el template");
+      const { template, subject } = await res.json();
       setIsSubmitting(false);
-      onSubmitStart(response);
+      onSubmitTemplate({ template, subject, formData });
     } catch {
       setErrors((e) => ({
         ...e,
-        submit: "Error al iniciar el proceso. Intentalo de nuevo.",
+        submit: "Error al generar el email. Intentalo de nuevo.",
       }));
       setIsSubmitting(false);
     }
@@ -767,30 +791,143 @@ function FormView({
 
             {/* Idiomas */}
             <div>
-              <label htmlFor="languages" className="text-sm font-semibold text-gray-700">
-                Idiomas que hablas
-              </label>
-              <input
-                id="languages"
-                type="text"
-                value={formData.languages}
-                onChange={(e) => setFormData((d) => ({ ...d, languages: e.target.value }))}
-                onBlur={(e) => {
-                  const trimmed = e.target.value.trim();
-                  setErrors((prev) => ({
-                    ...prev,
-                    languages: trimmed ? undefined : "Indica al menos un idioma",
-                  }));
-                }}
-                placeholder="Español, Francés, Inglés"
-                className={`text-base w-full border-2 rounded-xl px-4 py-3 mt-2 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors ${
-                  errors.languages ? "border-french-red" : "border-gray-200 hover:border-gray-300"
-                }`}
-              />
-              <p className="text-xs text-gray-400 mt-1">Separalos por comas</p>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-semibold text-gray-700">Idiomas que hablas</label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((d) => ({
+                      ...d,
+                      languages: [...d.languages, { language: "", level: "nativo" }],
+                    }))
+                  }
+                  className="text-xs text-french-blue font-semibold hover:underline"
+                >
+                  + Agregar idioma
+                </button>
+              </div>
+              <div className="flex flex-col gap-2 mt-2">
+                {formData.languages.map((entry, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={entry.language}
+                      onChange={(e) => {
+                        const langs = [...formData.languages];
+                        langs[i] = { ...langs[i], language: e.target.value };
+                        setFormData((d) => ({ ...d, languages: langs }));
+                      }}
+                      placeholder="Español"
+                      className="flex-1 text-sm border-2 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors border-gray-200 hover:border-gray-300"
+                    />
+                    <select
+                      value={entry.level}
+                      onChange={(e) => {
+                        const langs = [...formData.languages];
+                        langs[i] = { ...langs[i], level: e.target.value };
+                        setFormData((d) => ({ ...d, languages: langs }));
+                      }}
+                      className="text-sm border-2 rounded-xl px-2 py-2 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors border-gray-200 bg-white"
+                    >
+                      <option value="nativo">Nativo</option>
+                      <option value="básico">Básico</option>
+                      <option value="intermedio">Intermedio</option>
+                      <option value="avanzado">Avanzado</option>
+                    </select>
+                    {formData.languages.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData((d) => ({
+                            ...d,
+                            languages: d.languages.filter((_, j) => j !== i),
+                          }))
+                        }
+                        className="p-2 rounded-full hover:bg-red-50 text-gray-400 hover:text-french-red transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
               {errors.languages && (
                 <p className="text-sm text-french-red mt-1">{errors.languages}</p>
               )}
+            </div>
+
+            {/* Cartas de presentación */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700">
+                Cartas de presentación por rubro{" "}
+                <span className="text-gray-400 font-normal">(opcional)</span>
+              </label>
+              <p className="text-xs text-gray-400 mt-0.5 mb-3">
+                Se adjunta la carta del rubro correspondiente al empleador. PDF · Max 5 MB.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {RUBROS.map((rubro) => {
+                  const carta = formData.cartas[rubro];
+                  return (
+                    <div
+                      key={rubro}
+                      className={`rounded-xl border-2 px-3 py-2 flex items-center justify-between gap-2 ${
+                        carta ? "border-green-200 bg-green-50" : "border-gray-200"
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-gray-700 truncate">{rubro}</p>
+                        {carta && <p className="text-xs text-green-600">PDF cargado ✓</p>}
+                      </div>
+                      {carta ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData((d) => ({
+                              ...d,
+                              cartas: { ...d.cartas, [rubro]: null },
+                            }))
+                          }
+                          className="p-1 rounded-full hover:bg-red-50 text-gray-400 hover:text-french-red transition-colors flex-shrink-0"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const input = document.createElement("input");
+                            input.type = "file";
+                            input.accept = "application/pdf";
+                            input.onchange = (ev) => {
+                              const file = (ev.target as HTMLInputElement).files?.[0];
+                              if (!file) return;
+                              if (
+                                file.type !== "application/pdf" ||
+                                file.size > 5 * 1024 * 1024
+                              )
+                                return;
+                              const reader = new FileReader();
+                              reader.onload = (re) => {
+                                const b64 = re.target?.result as string;
+                                setFormData((d) => ({
+                                  ...d,
+                                  cartas: { ...d.cartas, [rubro]: b64 },
+                                }));
+                              };
+                              reader.readAsDataURL(file);
+                            };
+                            input.click();
+                          }}
+                          className="text-xs text-french-blue font-semibold hover:underline flex-shrink-0"
+                        >
+                          Subir
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Disponibilidad */}
@@ -871,13 +1008,143 @@ function FormView({
 }
 
 // ---------------------------------------------------------------------------
+// Template preview + confirm
+// ---------------------------------------------------------------------------
+
+function TemplateView({
+  template: initialTemplate,
+  subject: initialSubject,
+  formData,
+  onConfirm,
+  onBack,
+}: {
+  template: string;
+  subject: string;
+  formData: ApplicationFormData;
+  onConfirm: (response: Response) => void;
+  onBack: () => void;
+}) {
+  const [template, setTemplate] = useState(initialTemplate);
+  const [subject, setSubject] = useState(initialSubject);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleConfirm() {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const cvBase64Data = formData.cvBase64?.includes(",")
+        ? formData.cvBase64.split(",")[1]
+        : formData.cvBase64;
+
+      const cartasB64: Record<string, string> = {};
+      for (const [rubro, b64] of Object.entries(formData.cartas)) {
+        if (b64) {
+          cartasB64[rubro] = b64;
+        }
+      }
+
+      const response = await fetch("/api/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          cvBase64: cvBase64Data,
+          jobTypes: formData.jobTypes,
+          languages: formData.languages.filter((l) => l.language.trim()),
+          availFrom: formData.availFrom,
+          availTo: formData.availTo,
+          hasEUPassport: formData.hasEUPassport,
+          template,
+          subject,
+          cartas: cartasB64,
+        }),
+      });
+      if (!response.ok || !response.body) throw new Error("El servidor rechazó la solicitud");
+      setIsSubmitting(false);
+      onConfirm(response);
+    } catch {
+      setError("Error al iniciar el proceso. Intentalo de nuevo.");
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0a1929] via-[#0d2d5e] to-[#0055A4] py-12 overflow-hidden">
+      <FlyingBackground />
+      <div className="relative z-10 max-w-lg mx-auto px-4">
+        <Card>
+          <h2 className="font-display text-2xl text-french-blue mb-1">Revisá el email</h2>
+          <p className="text-xs text-gray-400 mb-6">
+            Editá libremente.{" "}
+            <span className="font-mono bg-gray-100 px-1 rounded text-gray-600">[EMPLEADOR]</span> y{" "}
+            <span className="font-mono bg-gray-100 px-1 rounded text-gray-600">[RUBRO]</span>{" "}
+            se reemplazan por cada empleador.
+          </p>
+
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Asunto</label>
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="text-sm w-full border-2 rounded-xl px-4 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors border-gray-200 hover:border-gray-300"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Cuerpo del email</label>
+              <textarea
+                value={template}
+                onChange={(e) => setTemplate(e.target.value)}
+                rows={14}
+                className="text-sm w-full border-2 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors border-gray-200 hover:border-gray-300 resize-y font-mono leading-relaxed"
+              />
+            </div>
+          </div>
+
+          {error && <p className="text-sm text-french-red mt-3">{error}</p>}
+
+          <div className="flex gap-3 mt-6">
+            <button
+              type="button"
+              onClick={onBack}
+              disabled={isSubmitting}
+              className="flex-1 border-2 border-gray-200 text-gray-600 rounded-xl py-3 px-4 text-sm font-semibold hover:border-gray-300 transition-all duration-200 disabled:opacity-50"
+            >
+              ← Volver
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={isSubmitting}
+              className="flex-[2] bg-french-blue text-white rounded-xl py-3 px-6 text-base font-bold hover:bg-blue-800 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-blue-200 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Iniciando...
+                </span>
+              ) : (
+                "Confirmar y enviar 🚀"
+              )}
+            </button>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const [view, setView] = useState<"login" | "form" | "progress">("login");
+  const [view, setView] = useState<"login" | "form" | "template" | "progress">("login");
   const [runResponse, setRunResponse] = useState<Response | null>(null);
+  const [templateStart, setTemplateStart] = useState<TemplateStartData | null>(null);
   const [signingIn, setSigningIn] = useState(false);
 
   if (status === "loading") return null;
@@ -890,10 +1157,20 @@ export default function Home() {
           onReset={() => { setRunResponse(null); setView("form"); }}
         />
       );
+    if (view === "template" && templateStart)
+      return (
+        <TemplateView
+          template={templateStart.template}
+          subject={templateStart.subject}
+          formData={templateStart.formData}
+          onConfirm={(res) => { setRunResponse(res); setView("progress"); }}
+          onBack={() => setView("form")}
+        />
+      );
     return (
       <FormView
         session={session}
-        onSubmitStart={(res) => { setRunResponse(res); setView("progress"); }}
+        onSubmitTemplate={(data) => { setTemplateStart(data); setView("template"); }}
       />
     );
   }

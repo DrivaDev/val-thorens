@@ -6,6 +6,8 @@ export interface SendEmailParams {
   cvBase64: string;
   cvFilename: string;
   fromEmail: string;
+  coverLetterBase64?: string;
+  coverLetterFilename?: string;
 }
 
 export async function sendEmail(params: SendEmailParams): Promise<void> {
@@ -38,6 +40,15 @@ export async function sendEmail(params: SendEmailParams): Promise<void> {
     '',
     params.cvBase64,
     '',
+    ...(params.coverLetterBase64 && params.coverLetterFilename ? [
+      `--${boundary}`,
+      'Content-Type: application/pdf',
+      `Content-Disposition: attachment; filename="${params.coverLetterFilename}"`,
+      'Content-Transfer-Encoding: base64',
+      '',
+      params.coverLetterBase64,
+      '',
+    ] : []),
     `--${boundary}--`,
   ].join('\r\n');
 

@@ -1,5 +1,5 @@
 const PLACES_ENDPOINT = 'https://places.googleapis.com/v1/places:searchText';
-const FIELD_MASK = 'places.displayName,places.formattedAddress,places.websiteUri,places.id';
+const FIELD_MASK = 'places.displayName,places.formattedAddress,places.websiteUri,places.id,places.types,places.primaryType';
 
 // Las 7 queries predefinidas para cubrir los tipos de empleadores de Val Thorens
 const VAL_THORENS_QUERIES = [
@@ -17,6 +17,7 @@ export interface Employer {
   name: string;
   address: string;
   website: string | null;
+  types: string[];
 }
 
 function sleep(ms: number) {
@@ -64,6 +65,10 @@ export async function discoverEmployers(): Promise<Employer[]> {
             name: place.displayName?.text ?? 'Unknown',
             address: place.formattedAddress ?? '',
             website: place.websiteUri ?? null,
+            types: [
+              ...(Array.isArray(place.types) ? place.types : []),
+              ...(place.primaryType ? [place.primaryType] : []),
+            ],
           };
           allEmployers.set(employer.placeId, employer); // DISC-04: dedup por placeId
         }
