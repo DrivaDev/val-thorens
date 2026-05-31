@@ -61,5 +61,7 @@ async function callWithRetry(
       throw error; // re-throw si no es 429 o se agotaron los intentos
     }
   }
-  throw new Error('[gemini] Max retries exceeded');
+  // WR-05: dead code — el loop siempre retorna en el try o re-lanza en el catch.
+  // El throw siguiente existe únicamente para satisfacer el análisis de flujo de TypeScript.
+  throw new Error('[gemini] unreachable: all attempts exhausted');
 }
