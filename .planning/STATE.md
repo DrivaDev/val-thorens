@@ -1,7 +1,7 @@
 # Project State
 
 ## Status
-Phase: 2 (Ready to execute)
+Phase: 2 (Executing)
 Last updated: 2026-05-31
 
 ## Project Reference
@@ -20,19 +20,19 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-**Active phase:** Phase 2 — Pipeline (ready to execute)
-**Active plan:** None (Phase 2 planned, not started)
-**Last completed:** Phase 1 — Auth & Form
+**Active phase:** Phase 2 — Pipeline (executing)
+**Active plan:** 02-02 (Wave 2 — places.ts + scraper.ts)
+**Last completed:** 02-01 — Deps + next.config.mjs
 
 ```
-Progress: [✓] Phase 1  [P] Phase 2  [ ] Phase 3
+Progress: [✓] Phase 1  [1/5] Phase 2  [ ] Phase 3
 ```
 
 ## Performance Metrics
 
-- Plans completed: 0
+- Plans completed: 1
 - Phases completed: 0
-- Requirements delivered: 0 / 37
+- Requirements delivered: 1 / 37
 
 ## Accumulated Context
 
@@ -59,4 +59,5 @@ Progress: [✓] Phase 1  [P] Phase 2  [ ] Phase 3
 
 ## Session Continuity
 
-Next action: Run `/gsd-execute-phase 2` to execute Phase 2 (5 plans, waves 1→2→3).
+Next action: Continue Phase 2 execution — run plan 02-02 (lib/places.ts + lib/scraper.ts).
+Last session: 2026-05-31 — Completed 02-01-PLAN.md (deps + next.config.mjs).

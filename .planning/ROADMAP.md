@@ -48,7 +48,7 @@ Plans:
 
 Plans:
 - **Wave 1**
-  - [ ] 02-01-PLAN.md — Dependencias del pipeline: instalar @sparticuz/chromium, puppeteer-core, @google/generative-ai, googleapis + configurar next.config.mjs
+  - [x] 02-01-PLAN.md — Dependencias del pipeline: instalar @sparticuz/chromium, puppeteer-core, @google/generative-ai, googleapis + configurar next.config.mjs
 - **Wave 2** *(bloqueado en Wave 1)*
   - [ ] 02-02-PLAN.md — lib/places.ts (discovery Places API) + lib/scraper.ts (Puppeteer email scraping)
   - [ ] 02-03-PLAN.md — lib/gemini.ts (generación email Gemini + retry 429) + lib/gmail.ts (envío MIME Gmail API)
@@ -82,5 +82,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth & Form | 3/3 | Complete | 2026-05-31 |
-| 2. Pipeline | 0/5 | Planned | - |
+| 2. Pipeline | 1/5 | In Progress | - |
 | 3. Real-Time UX | 0/0 | Not started | - |
