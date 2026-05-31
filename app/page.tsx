@@ -246,8 +246,6 @@ interface ApplicationFormData {
   cvBase64: string | null;
   jobTypes: string[];
   languages: LanguageEntry[];
-  availFrom: string;
-  availTo: string;
   hasEUPassport: boolean;
   cartas: Record<string, string | null>;
 }
@@ -257,7 +255,6 @@ interface FormErrors {
   cv?: string;
   jobTypes?: string;
   languages?: string;
-  dates?: string;
   submit?: string;
 }
 
@@ -548,8 +545,6 @@ function FormView({
     cvBase64: null,
     jobTypes: [],
     languages: [{ language: "", level: "nativo" }],
-    availFrom: "",
-    availTo: "",
     hasEUPassport: false,
     cartas: {},
   });
@@ -566,17 +561,6 @@ function FormView({
       errs.jobTypes = "Selecciona al menos un tipo de trabajo";
     if (data.languages.every(l => !l.language.trim()))
       errs.languages = "Indica al menos un idioma";
-    if (!data.availFrom || !data.availTo) {
-      errs.dates = "Indica las fechas de disponibilidad";
-    } else if (!isValidDate(data.availFrom) || !isValidDate(data.availTo)) {
-      errs.dates = "Formato: dd/mm/aaaa (ej: 15/12/2025)";
-    } else {
-      const [fd, fm, fy] = data.availFrom.split("/").map(Number);
-      const [td, tm, ty] = data.availTo.split("/").map(Number);
-      const from = new Date(fy, fm - 1, fd);
-      const to   = new Date(ty, tm - 1, td);
-      if (from >= to) errs.dates = "La fecha de inicio debe ser anterior a la de fin";
-    }
     return errs;
   }
 
@@ -617,8 +601,6 @@ function FormView({
           name: formData.name,
           jobTypes: formData.jobTypes,
           languages: formData.languages.filter(l => l.language.trim()),
-          availFrom: formData.availFrom,
-          availTo: formData.availTo,
           hasEUPassport: formData.hasEUPassport,
         }),
       });
@@ -940,56 +922,6 @@ function FormView({
               )}
             </div>
 
-            {/* Disponibilidad */}
-            <div>
-              <label className="text-sm font-semibold text-gray-700">Disponibilidad</label>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <div>
-                  <label htmlFor="availFrom" className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                    Desde
-                  </label>
-                  <input
-                    id="availFrom"
-                    type="text"
-                    value={formData.availFrom}
-                    onChange={(e) => setFormData((d) => ({ ...d, availFrom: e.target.value }))}
-                    onBlur={() => {
-                      const errs = validate(formData);
-                      setErrors((e) => ({ ...e, dates: errs.dates }));
-                    }}
-                    placeholder="dd/mm/aaaa"
-                    maxLength={10}
-                    className={`text-base w-full border-2 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors ${
-                      errors.dates ? "border-french-red" : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="availTo" className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                    Hasta
-                  </label>
-                  <input
-                    id="availTo"
-                    type="text"
-                    value={formData.availTo}
-                    onChange={(e) => setFormData((d) => ({ ...d, availTo: e.target.value }))}
-                    onBlur={() => {
-                      const errs = validate(formData);
-                      setErrors((e) => ({ ...e, dates: errs.dates }));
-                    }}
-                    placeholder="dd/mm/aaaa"
-                    maxLength={10}
-                    className={`text-base w-full border-2 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-french-blue focus:border-transparent transition-colors ${
-                      errors.dates ? "border-french-red" : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  />
-                </div>
-              </div>
-              {errors.dates && (
-                <p className="text-sm text-french-red mt-1">{errors.dates}</p>
-              )}
-            </div>
-
             {/* Submit */}
             {errors.submit && (
               <p className="text-sm text-french-red">{errors.submit}</p>
@@ -1062,8 +994,6 @@ function TemplateView({
           cvBase64: cvBase64Data,
           jobTypes: formData.jobTypes,
           languages: formData.languages.filter((l) => l.language.trim()),
-          availFrom: formData.availFrom,
-          availTo: formData.availTo,
           hasEUPassport: formData.hasEUPassport,
           template,
           subject,

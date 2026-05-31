@@ -12,8 +12,6 @@ const LEVEL_EN: Record<string, string> = {
 function buildTemplate(params: {
   name: string;
   languages: LanguageEntry[];
-  availFrom: string;
-  availTo: string;
   hasEUPassport: boolean;
 }): string {
   const languagesStr = params.languages
@@ -29,7 +27,7 @@ function buildTemplate(params: {
 
 I am writing to express my interest in joining your team at [EMPLEADOR] for the upcoming winter season in Val Thorens. I am seeking a position in [RUBRO], and I believe that [EMPLEADOR] would be a great fit for my profile.
 
-My name is ${params.name}, and I will be available from ${params.availFrom} to ${params.availTo}. I am enthusiastic, reliable, and eager to contribute to your team throughout the season.${passportLine}
+I am enthusiastic, reliable, and eager to contribute to your team throughout the season.${passportLine}
 
 I speak the following languages: ${languagesStr || 'please see my CV'}.
 
@@ -51,8 +49,6 @@ export async function POST(request: Request) {
     name: string;
     jobTypes: string[];
     languages: LanguageEntry[];
-    availFrom: string;
-    availTo: string;
     hasEUPassport: boolean;
   };
 
@@ -71,8 +67,6 @@ export async function POST(request: Request) {
   const template = buildTemplate({
     name: body.name,
     languages: body.languages ?? [],
-    availFrom: body.availFrom ?? '',
-    availTo: body.availTo ?? '',
     hasEUPassport: body.hasEUPassport ?? false,
   });
 

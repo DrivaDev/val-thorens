@@ -46,8 +46,6 @@ export async function POST(request: Request) {
     cvBase64: string;
     jobTypes: string[];
     languages: { language: string; level: string }[];
-    availFrom: string;
-    availTo: string;
     hasEUPassport: boolean;
     template: string;
     subject: string;
