@@ -89,7 +89,8 @@ export async function POST(request: Request) {
 
         const employers = await discoverEmployers();
 
-        controller.enqueue(sseEvent({ type: 'discovery_complete', total: employers.length }));
+        const withWebsite = employers.filter(e => e.website).length;
+        controller.enqueue(sseEvent({ type: 'discovery_complete', total: employers.length, withWebsite }));
 
         for (const employer of employers) {
           try {

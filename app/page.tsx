@@ -367,7 +367,7 @@ function LoginView({
 
 type SSEEvent =
   | { type: "searching"; message: string }
-  | { type: "discovery_complete"; total: number }
+  | { type: "discovery_complete"; total: number; withWebsite?: number }
   | { type: "scraping"; employer: string; email: string | null }
   | { type: "generating"; employer: string }
   | { type: "sent"; employer: string; email: string }
@@ -385,7 +385,12 @@ function eventToLogLine(ev: SSEEvent): LogLine | null {
     case "searching":
       return { text: ev.message, color: "blue" };
     case "discovery_complete":
-      return { text: `Se encontraron ${ev.total} empleadores`, color: "blue" };
+      return {
+        text: ev.withWebsite !== undefined
+          ? `Se encontraron ${ev.total} empleadores (${ev.withWebsite} con website, ${ev.total - ev.withWebsite} sin website)`
+          : `Se encontraron ${ev.total} empleadores`,
+        color: "blue",
+      };
     case "scraping":
       return ev.email === null
         ? { text: `${ev.employer}: sin email, omitido`, color: "gray" }
