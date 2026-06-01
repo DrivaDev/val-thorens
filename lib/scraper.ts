@@ -18,18 +18,22 @@ function extractEmails(html: string): string[] {
     seen.add(email.toLowerCase());
   }
 
-  // filter obvious false positives (image names, example addresses, etc.)
-  return Array.from(seen).filter(
-    (e) =>
-      !e.endsWith('.png') &&
-      !e.endsWith('.jpg') &&
-      !e.endsWith('.svg') &&
-      !e.includes('example.') &&
-      !e.includes('sentry') &&
-      !e.includes('wixpress') &&
-      !e.includes('squarespace') &&
-      e.length < 80
-  );
+  const FAKE_DOMAINS = ['example.com', 'example.org', 'domain.com', 'yourdomain.com',
+    'test.com', 'email.com', 'mail.com', 'website.com', 'site.com', 'yoursite.com',
+    'sentry.io', 'wixpress.com', 'squarespace.com', 'sendgrid.net', 'mailchimp.com',
+    'no-reply.com', 'noreply.com'];
+  const FAKE_LOCALS = ['email', 'yourname', 'name', 'username', 'user', 'test',
+    'webmaster', 'placeholder', 'exemple', 'votrenom', 'votre-email'];
+
+  return Array.from(seen).filter((e) => {
+    if (!e.includes('@') || e.length > 80) return false;
+    if (e.endsWith('.png') || e.endsWith('.jpg') || e.endsWith('.svg') || e.endsWith('.gif')) return false;
+    const [local, domain] = e.split('@');
+    if (!domain) return false;
+    if (FAKE_DOMAINS.some((d) => domain === d || domain.endsWith('.' + d))) return false;
+    if (FAKE_LOCALS.includes(local)) return false;
+    return true;
+  });
 }
 
 function prioritizeEmail(emails: string[]): string {
