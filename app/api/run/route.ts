@@ -89,10 +89,16 @@ export async function POST(request: Request) {
 
         const employers = await discoverEmployers();
 
-        const withWebsite = employers.filter(e => e.website).length;
-        controller.enqueue(sseEvent({ type: 'discovery_complete', total: employers.length, withWebsite }));
+        // Filtrar por rubro seleccionado
+        const selectedRubro = body.jobTypes?.[0] ?? null;
+        const filtered = selectedRubro
+          ? employers.filter(e => categorizeEmployer(e.types, e.name) === selectedRubro)
+          : employers;
 
-        for (const employer of employers) {
+        const withWebsite = filtered.filter(e => e.website).length;
+        controller.enqueue(sseEvent({ type: 'discovery_complete', total: filtered.length, withWebsite }));
+
+        for (const employer of filtered) {
           try {
             if (sentCount > 0) await sleep(4000);
 

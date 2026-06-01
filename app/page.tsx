@@ -750,28 +750,26 @@ function FormView({
             {/* Tipo de trabajo */}
             <div>
               <label className="text-sm font-semibold text-gray-700">Tipo de trabajo</label>
+              <p className="text-xs text-gray-400 mt-0.5 mb-2">Seleccioná un rubro por corrida.</p>
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {RUBROS.map((type) => (
                   <label
                     key={type}
                     className={`flex items-center gap-2 text-sm cursor-pointer rounded-xl border-2 px-3 py-2 transition-all duration-150 ${
-                      formData.jobTypes.includes(type)
+                      formData.jobTypes[0] === type
                         ? "border-french-blue bg-blue-50 text-french-blue font-semibold"
                         : "border-gray-200 text-gray-700 hover:border-gray-300"
                     }`}
                   >
                     <input
-                      type="checkbox"
-                      checked={formData.jobTypes.includes(type)}
-                      onChange={(e) => {
+                      type="radio"
+                      name="jobType"
+                      checked={formData.jobTypes[0] === type}
+                      onChange={() => {
                         setFormData((d) => ({
                           ...d,
-                          jobTypes: e.target.checked
-                            ? [...d.jobTypes, type]
-                            : d.jobTypes.filter((t) => t !== type),
-                          cartas: e.target.checked
-                            ? d.cartas
-                            : { ...d.cartas, [type]: null },
+                          jobTypes: [type],
+                          cartas: { [type]: d.cartas[type] ?? null },
                         }));
                       }}
                       className="accent-french-blue"
