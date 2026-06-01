@@ -148,6 +148,7 @@ export async function POST(request: Request) {
 
           } catch (employerErr) {
             const errMessage = employerErr instanceof Error ? employerErr.message : String(employerErr);
+            console.error(`[run] employer error — ${employer.name} (${employer.website}):`, errMessage);
             skippedCount++;
             controller.enqueue(sseEvent({ type: 'send_error', employer: employer.name, error: errMessage }));
           }
