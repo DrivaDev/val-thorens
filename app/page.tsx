@@ -1007,11 +1007,16 @@ function TemplateView({
           cartas: cartasB64,
         }),
       });
-      if (!response.ok || !response.body) throw new Error("El servidor rechazó la solicitud");
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error ?? `HTTP ${response.status}`);
+      }
+      if (!response.body) throw new Error("Sin body en la respuesta");
       setIsSubmitting(false);
       onConfirm(response);
-    } catch {
-      setError("Error al iniciar el proceso. Intentalo de nuevo.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Error: ${msg}`);
       setIsSubmitting(false);
     }
   }
