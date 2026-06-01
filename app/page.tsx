@@ -1,6 +1,7 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
+import { flushSync } from "react-dom";
 import {
   Loader2, CheckCircle2, X,
   Snowflake, Mountain, Wind, Star,
@@ -444,10 +445,10 @@ function ProgressView({
             continue;
           }
           if (ev.type === "complete") {
-            setSummary({ sent: ev.sent, skipped: ev.skipped });
+            flushSync(() => setSummary({ sent: ev.sent, skipped: ev.skipped }));
           } else {
             const logLine = eventToLogLine(ev);
-            if (logLine) setLogLines((prev) => [...prev, logLine]);
+            if (logLine) flushSync(() => setLogLines((prev) => [...prev, logLine]));
           }
         }
       }
